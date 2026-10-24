@@ -1,0 +1,11 @@
+{
+  "name": "Daymark Daily Planner",
+  "short_name": "Daymark",
+  "description": "Your schedule, tasks and notes in one calm place.",
+  "start_url": "/Notes/",
+  "scope": "/Notes/",
+  "display": "standalone",
+  "background_color": "#f6f5f1",
+  "theme_color": "#f6f5f1",
+  "icons": [{"src": "/Notes/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
+}
