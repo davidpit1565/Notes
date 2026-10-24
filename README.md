@@ -4,6 +4,8 @@ Daymark combines a daily schedule, flexible tasks, and date-linked notes in one 
 
 ## Current delivery
 
+- Native SwiftUI iOS project scaffold in `ios/Daymark.xcodeproj` (local-only prototype; not App Store ready)
+
 - Responsive web app / Progressive Web App (Mac, iPhone, iPad)
 - Daily timeline with timed blocks and flexible tasks
 - Notes attached to a date

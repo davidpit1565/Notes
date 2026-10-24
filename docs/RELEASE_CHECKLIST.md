@@ -15,12 +15,12 @@ This is a checklist, not a claim that the product is App Store ready.
 
 ## Notifications
 - [ ] Define reminder semantics and timezone handling.
-- [ ] Implement and test scheduled delivery while app is closed (requires push backend or native notifications).
+- [x] Add native local notifications for scheduled event starts (implementation only).\n- [ ] Test notification permission, timezone behavior and delivery while the app is closed on a physical iPhone.\n- [ ] Implement browser/PWA reminders if they remain a product requirement.
 - [ ] Explain permission purpose before asking for notification permission.
 
-## Native iOS / App Store (future phase)
+## Native iOS / App Store (scaffold exists; release still blocked)
 - [ ] Decide native SwiftUI vs Capacitor wrapper; a website is not an Xcode app by itself.
-- [ ] Create and build the Xcode project with current Xcode/SDK.
+- [x] Add a starter SwiftUI Xcode project to `ios/Daymark.xcodeproj` (not yet build-verified).\n- [ ] Build the Xcode project with current Xcode/SDK and fix any compiler/project issues.
 - [ ] Create app icon asset catalog (all required sizes/appearances), launch experience, bundle ID, version/build.
 - [ ] Configure signing, entitlements, privacy manifest as applicable, and required-reason API declarations if applicable.
 - [ ] Implement native notification scheduling and request permissions contextually.
