@@ -73,11 +73,8 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingComposer) {
                 ItemComposer(selectedDate: selectedDate) { title, details, kind, date, start, end in
-                    store.add(title: title, details: details, kind: kind, date: date, start: start, end: end)
-                    if kind == .event {
-                        let item = store.items(on: date).first(where: { $0.title == title && $0.kind == .event })
-                        if let item { Task { await ReminderManager.schedule(item) } }
-                    }
+                    let item = store.add(title: title, details: details, kind: kind, date: date, start: start, end: end)
+                    if kind == .event { Task { await ReminderManager.schedule(item) } }
                 }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
