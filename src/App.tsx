@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronDown, Circle, Clock3, Cloud, CloudOff, FileText, ListTodo, LogIn, LogOut, Menu, Plus, Search, Settings2, Sparkles, StickyNote, Sun, X } from 'lucide-react'
-import { cloudEnabled, supabase } from './lib/supabase'
+import { ArrowLeft, ArrowRight, Bell, CalendarDays, Check, Circle, Clock3, FileText, ListTodo, Menu, Plus, Search, Settings2, Sparkles, StickyNote, Sun, X } from 'lucide-react'
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem, type PlannerState } from './lib/types'
 
 type View = 'Today' | 'Upcoming' | 'Notes' | 'All tasks'
@@ -19,62 +18,16 @@ export default function App() {
   const [showComposer, setShowComposer] = useState(false)
   const [draft, setDraft] = useState<PlannerItem>(() => newItem(todayKey()))
   const [kind, setKind] = useState<PlannerItem['kind']>('task')
-  const [showAccount, setShowAccount] = useState(false)
-  const [email, setEmail] = useState('')
-  const [signedIn, setSignedIn] = useState(false)
-  const [userEmail, setUserEmail] = useState('')
-  const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState('')
   const [mobileNav, setMobileNav] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [month, setMonth] = useState(todayKey().slice(0, 7))
-  const [cloudReady, setCloudReady] = useState(false)
 
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(''), 2800) }
   const persist = useCallback((next: PlannerItem[]) => {
     setItems(next)
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: next })) } catch { notify('Could not save locally. Check available browser storage.') }
   }, [])
-  const loadCloud = useCallback(async (userId: string) => {
-    if (!supabase) return
-    const { data, error } = await supabase.from('daymark_state').select('state').eq('user_id', userId).maybeSingle()
-    if (error) { notify('Signed in, but cloud data could not load. Check the setup guide.'); return }
-    if (data?.state && Array.isArray((data.state as PlannerState).items)) {
-      const remote = (data.state as PlannerState).items
-      // Keep local edits when the cloud row is empty; otherwise cloud is the signed-in source of truth.
-      persist(remote)
-    } else {
-      const local = readLocal().items
-      const { error: saveError } = await supabase.from('daymark_state').upsert({ user_id: userId, state: { items: local }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-      if (saveError) notify('Cloud storage is not configured correctly.')
-    }
-    setCloudReady(true)
-  }, [persist])
-  useEffect(() => {
-    const client = supabase
-    if (!client) return
-    client.auth.getSession().then(({ data }) => {
-      const session = data.session
-      if (session) { setSignedIn(true); setUserEmail(session.user.email ?? ''); void loadCloud(session.user.id) }
-    })
-    const { data: listener } = client.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(Boolean(session)); setUserEmail(session?.user.email ?? '')
-      if (session) window.setTimeout(() => { void loadCloud(session.user.id) }, 0)
-      else setCloudReady(false)
-    })
-    return () => listener.subscription.unsubscribe()
-  }, [loadCloud])
-  useEffect(() => {
-    const client = supabase
-    if (!client || !signedIn || !cloudReady) return
-    const t = window.setTimeout(async () => {
-      const { data } = await client.auth.getUser()
-      if (!data.user) return
-      const { error } = await client.from('daymark_state').upsert({ user_id: data.user.id, state: { items }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-      if (error) notify('Saved on this device; cloud sync failed. Please check your connection.')
-    }, 650)
-    return () => window.clearTimeout(t)
-  }, [items, signedIn, cloudReady])
   const dayItems = useMemo(() => items.filter(i => i.date === selectedDate), [items, selectedDate])
   const visibleItems = useMemo(() => {
     let list = items
@@ -97,17 +50,8 @@ export default function App() {
   const editItem = (item: PlannerItem) => { setDraft({ ...item }); setKind(item.kind); setShowComposer(true) }
   const toggleDone = (id: string) => persist(items.map(i => i.id === id ? { ...i, done: !i.done } : i))
   const deleteItem = (id: string) => { persist(items.filter(i => i.id !== id)); notify('Removed') }
-  const login = async () => {
-    if (!supabase) { notify('Cloud login needs Supabase setup first. See docs/SETUP.md.'); return }
-    if (!email.trim()) { notify('Enter your email address.'); return }
-    setBusy(true)
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: window.location.href } })
-    setBusy(false)
-    notify(error ? error.message : 'Check your email for your secure sign-in link.')
-  }
-  const logout = async () => { if (supabase) await supabase.auth.signOut(); setSignedIn(false); setCloudReady(false); setShowAccount(false); notify('Signed out') }
   const askNotifications = () => {
-    notify('Scheduled reminders are not implemented yet. Daymark will not send alerts in this version.')
+    notify('Scheduled reminders are not available on the website yet.')
   }
   const dateHeading = view === 'Today' ? (selectedDate === todayKey() ? 'Today' : selectedDate === shiftDay(todayKey(),1) ? 'Tomorrow' : fmtDay(selectedDate,{weekday:'long'})) : view
   const dateLabel = fmtDay(selectedDate, { month: 'long', day: 'numeric', year: 'numeric' })
@@ -120,9 +64,8 @@ export default function App() {
 
   return <div className="app-shell">
     <aside className={'sidebar '+(mobileNav?'sidebar-open':'')}>
-      <div className="brand"><div className="brand-mark"><span> d </span></div><span>daymark</span><span className="beta">BETA</span><button className="icon-btn mobile-close" onClick={()=>setMobileNav(false)} aria-label="Close menu"><X size={18}/></button></div>
-      <button className="profile-switch" onClick={()=>setShowAccount(!showAccount)}><div className="avatar">{signedIn ? (userEmail[0]??'D').toUpperCase() : 'D'}</div><div className="profile-text"><strong>{signedIn ? userEmail.split('@')[0] : 'My workspace'}</strong><small>{signedIn ? 'Synced workspace' : 'Personal planner'}</small></div><ChevronDown size={16}/></button>
-      {showAccount && <div className="account-panel">{cloudEnabled ? signedIn ? <><p className="account-email">{userEmail}</p><p className="muted small">Your schedule syncs to this account.</p><button className="secondary-btn full" onClick={logout}><LogOut size={15}/> Sign out</button></> : <><p className="account-title">Sync across devices</p><p className="muted small">Sign in with a secure email link to sync your planner.</p><input type="email" placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary-btn full" onClick={login} disabled={busy}><LogIn size={15}/>{busy?'Sending link…':'Email me a sign-in link'}</button></> : <><p className="account-title">Local mode</p><p className="muted small">This browser saves your items on this device. Configure Supabase to enable account sync.</p><a className="text-link" href="https://github.com/davidpit1565/Notes/blob/main/docs/SETUP.md" target="_blank" rel="noreferrer">Setup guide ↗</a></>}</div>}
+      <div className="brand"><div className="brand-mark"><span> a </span></div><span>dailume</span><span className="beta">BETA</span><button className="icon-btn mobile-close" onClick={()=>setMobileNav(false)} aria-label="Close menu"><X size={18}/></button></div>
+      <div className="profile-switch" aria-label="Local workspace"><div className="avatar">D</div><div className="profile-text"><strong>My workspace</strong><small>Saved on this device</small></div></div>
       <button className="new-plan" onClick={()=>openComposer('task')}><Plus size={17}/><span>New item</span><kbd>⌘ K</kbd></button>
       <div className="nav-label">WORKSPACE</div>
       <nav className="nav-list">
@@ -131,11 +74,11 @@ export default function App() {
         <button className={view==='All tasks'?'active':''} onClick={()=>{setView('All tasks');setMobileNav(false)}}><ListTodo size={17}/><span>All tasks</span><span className="nav-count">{items.filter(i=>i.kind==='task'&&!i.done).length||''}</span></button>
         <button className={view==='Notes'?'active':''} onClick={()=>{setView('Notes');setMobileNav(false)}}><StickyNote size={17}/><span>Notes</span></button>
       </nav>
-      <div className="sidebar-bottom"><div className="sync-status">{cloudEnabled ? signedIn ? <><Cloud size={15}/><span>{cloudReady?'Cloud sync on':'Connecting…'}</span><i className={cloudReady?'dot green':'dot'}/></> : <><CloudOff size={15}/><span>Not signed in</span></> : <><CloudOff size={15}/><span>Saved on this device</span></>}</div><button className="nav-settings" onClick={askNotifications}><Bell size={16}/><span>Reminders</span><span className="settings-pill">Later</span></button><div className="sidebar-footer">A little more room for what matters.</div></div>
+      <div className="sidebar-bottom"><div className="sync-status"><span>Saved privately on this device</span><i className="dot green"/></div><button className="nav-settings" onClick={askNotifications}><Bell size={16}/><span>Reminders</span><span className="settings-pill">Later</span></button><div className="sidebar-footer">A little more room for what matters.</div></div>
     </aside>
     {mobileNav && <button className="mobile-scrim" onClick={()=>setMobileNav(false)} aria-label="Close navigation"/>}
     <main className="main-panel">
-      <header className="topbar"><button className="icon-btn mobile-menu" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button><div className="breadcrumbs"><span>Workspace</span><span className="crumb-slash">/</span><strong>{view==='Today'?'My day':view}</strong></div><div className="top-actions"><label className="search-box"><Search size={16}/><input placeholder="Search anything…" value={query} onChange={e=>setQuery(e.target.value)}/><kbd>⌘ /</kbd></label><button className="icon-btn top-bell" onClick={askNotifications} aria-label="Reminders not yet available"><Bell size={18}/></button><div className="top-avatar">{signedIn?(userEmail[0]??'D').toUpperCase():'D'}</div></div></header>
+      <header className="topbar"><button className="icon-btn mobile-menu" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button><div className="breadcrumbs"><span>Workspace</span><span className="crumb-slash">/</span><strong>{view==='Today'?'My day':view}</strong></div><div className="top-actions"><label className="search-box"><Search size={16}/><input placeholder="Search anything…" value={query} onChange={e=>setQuery(e.target.value)}/><kbd>⌘ /</kbd></label><button className="icon-btn top-bell" onClick={askNotifications} aria-label="Reminders not yet available"><Bell size={18}/></button><div className="top-avatar">D</div></div></header>
       <div className="page-content">
         {view==='Today' && <div className="day-header"><div><div className="eyebrow"><span className="eyebrow-dot"/> YOUR SPACE TO FOCUS</div><h1>{dateHeading}<span className="heading-period">.</span></h1><p className="date-subtitle">{dateLabel} <span>·</span> {new Date(selectedDate+'T12:00:00').toLocaleDateString(undefined,{year:'numeric'})===new Date().toLocaleDateString(undefined,{year:'numeric'})?'Make today count, one thing at a time.':'A plan that can flex with you.'}</p></div><div className="date-controls"><button className="icon-btn date-arrow" onClick={()=>setSelectedDate(shiftDay(selectedDate,-1))} aria-label="Previous day"><ArrowLeft size={17}/></button><button className="date-picker-btn" onClick={()=>setCalendarOpen(!calendarOpen)}><CalendarDays size={16}/><span>Pick a day</span></button><button className="icon-btn date-arrow" onClick={()=>setSelectedDate(shiftDay(selectedDate,1))} aria-label="Next day"><ArrowRight size={17}/></button>{calendarOpen&&<div className="calendar-pop"><div className="calendar-month"><button className="icon-btn" onClick={()=>setMonth(m=>{const d=new Date(m+'-01T12:00:00');d.setMonth(d.getMonth()-1);return todayKey(d).slice(0,7)})}><ArrowLeft size={15}/></button><strong>{monthDate.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</strong><button className="icon-btn" onClick={()=>setMonth(m=>{const d=new Date(m+'-01T12:00:00');d.setMonth(d.getMonth()+1);return todayKey(d).slice(0,7)})}><ArrowRight size={15}/></button></div><div className="calendar-grid">{dayNames.map((d,i)=><span className="calendar-dayname" key={i}>{d}</span>)}{dayKeys.map((key,i)=>key?<button key={key} className={'calendar-day '+(key===selectedDate?'chosen ':'')+(key===todayKey()?'is-today':'')} onClick={()=>{setSelectedDate(key);setCalendarOpen(false)}}>{Number(key.slice(-2))}{itemCount(key)>0&&<i/>}</button>:<span key={'blank'+i}/>)}</div><button className="today-link" onClick={()=>{setSelectedDate(todayKey());setMonth(todayKey().slice(0,7));setCalendarOpen(false)}}>Back to today</button></div>}</div></div>}
         {view!=='Today'&&<div className="day-header compact-header"><div><div className="eyebrow"><span className="eyebrow-dot"/> YOUR WORKSPACE</div><h1>{view}<span className="heading-period">.</span></h1><p className="date-subtitle">{view==='Notes'?'Thoughts, saved alongside your days.':view==='Upcoming'?'Everything ahead, with the details that matter.':'One clear list of the things to do.'}</p></div><button className="primary-btn header-add" onClick={()=>openComposer(view==='Notes'?'note':'task')}><Plus size={16}/> Add {view==='Notes'?'note':'item'}</button></div>}
@@ -146,7 +89,7 @@ export default function App() {
         {visibleItems.length>0&&<div className="bottom-add"><button onClick={()=>openComposer(view==='Notes'?'note':'task')}><Plus size={16}/> Add another {view==='Notes'?'note':'item'}</button><span>Your plan is allowed to change.</span></div>}
         {view==='Today'&&<div className="end-note"><span>✳</span><p>Leave a little room for the unexpected.</p></div>}
       </div>
-      <footer className="main-footer"><span>DAYMARK <i>·</i> YOUR DAY, YOUR PACE</span><span>{cloudEnabled&&signedIn?'Cloud account enabled':'Private to this browser'} <span className="footer-dot">●</span></span></footer>
+      <footer className="main-footer"><span>DAILUME <i>·</i> YOUR DAY, YOUR PACE</span><span>Private to this browser <span className="footer-dot">●</span></span></footer>
     </main>
     {showComposer&&<div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setShowComposer(false)}}><section className="composer" role="dialog" aria-modal="true" aria-labelledby="composer-title"><header className="composer-header"><div><span className="eyebrow">MAKE SPACE FOR IT</span><h2 id="composer-title">{items.some(i=>i.id===draft.id)?'Edit your item':'Add to your day'}</h2></div><button className="icon-btn" onClick={()=>setShowComposer(false)} aria-label="Close"><X size={19}/></button></header><div className="kind-switch">{(['task','event','note'] as const).map(k=><button key={k} className={kind===k?'selected':''} onClick={()=>{setKind(k);setDraft(d=>({...d,kind:k}))}}>{k==='task'?<ListTodo size={15}/>:k==='event'?<Clock3 size={15}/>:<StickyNote size={15}/>} {k==='event'?'Time block':k==='note'?'Note':'Task'}</button>)}</div><label className="field-label">Title<input autoFocus value={draft.title} onChange={e=>setDraft(d=>({...d,title:e.target.value}))} placeholder={kind==='event'?'e.g. Work on the presentation':kind==='note'?'A thought to keep…':'e.g. Finish project outline'} onKeyDown={e=>{if(e.key==='Enter'&&e.metaKey)saveDraft()}}/></label><label className="field-label">Date<input type="date" value={draft.date} onChange={e=>setDraft(d=>({...d,date:e.target.value}))}/></label>{kind==='event'&&<div className="time-fields"><label className="field-label">Starts<input type="time" value={draft.start} onChange={e=>setDraft(d=>({...d,start:e.target.value}))}/></label><label className="field-label">Ends<input type="time" value={draft.end} onChange={e=>setDraft(d=>({...d,end:e.target.value}))}/></label></div>}<label className="field-label">Details <span className="optional">OPTIONAL</span><textarea value={draft.details} onChange={e=>setDraft(d=>({...d,details:e.target.value}))} placeholder={kind==='note'?'Write freely. Add context, ideas, links…':'Anything you want to remember about this?'} rows={4}/></label><label className="field-label">Area<select value={draft.category} onChange={e=>setDraft(d=>({...d,category:e.target.value}))}>{['Personal','Work','Study','Health','Errands','Ideas','Other'].map(c=><option key={c}>{c}</option>)}</select></label>{kind==='task'&&<label className="done-toggle"><input type="checkbox" checked={draft.done} onChange={e=>setDraft(d=>({...d,done:e.target.checked}))}/> Mark as completed</label>}<div className="composer-actions"><button className="secondary-btn" onClick={()=>setShowComposer(false)}>Cancel</button><button className="primary-btn" onClick={saveDraft}><Check size={16}/> Save {kind==='note'?'note':kind==='event'?'time block':'task'}</button></div><p className="composer-hint">Tip: use details for anything that does not belong on a calendar.</p></section></div>}
     {toast&&<div className="toast"><span className="toast-check"><Check size={14}/></span>{toast}</div>}
