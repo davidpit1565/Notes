@@ -31,7 +31,7 @@ struct PlannerItem: Identifiable, Codable, Equatable {
 @Observable
 final class PlannerStore {
     private(set) var items: [PlannerItem] = []
-    private let storageKey = "daymark.native.items.v1"
+    private let storageKey = "dailume.native.items.v1"
 
     init() { load() }
 

@@ -38,7 +38,7 @@ enum ReminderManager {
         content.sound = .default
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
         let request = UNNotificationRequest(
-            identifier: "daymark-event-\(item.id.uuidString)",
+            identifier: "dailume-event-\(item.id.uuidString)",
             content: content,
             trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         )

@@ -1,19 +1,26 @@
 # Architecture
 
-## Current web app
-- React + TypeScript + Vite; responsive, browser-first UI.
-- PWA manifest and app icon for home-screen installation.
-- Local storage is the zero-setup fallback.
-- Optional Supabase Auth (email OTP) and Postgres JSON state row per user.
-- Static hosting is possible through GitHub Pages; Pages does not provide a database, authentication, or scheduled push delivery.
+## Web app
+- React + TypeScript + Vite.
+- Responsive PWA hosted as a static site on GitHub Pages at `/Notes/`.
+- Planner entries stored in browser local storage only.
+- No Supabase package, login, database, analytics, or server-side sync.
+- The website is independent of the native iOS app; data does not transfer between them.
 
-## Data model
-A planner item has: `id`, `date` (local YYYY-MM-DD), `title`, `details`, `kind` (`event | task | note`), `start`, `end`, `done`, `category`, `createdAt`.
+## Native iOS
+- SwiftUI app in `ios/Daymark.xcodeproj`.
+- Local planner persistence on device.
+- Local event notifications using UserNotifications.
+- App display name: Dailume; bundle identifier currently configured as `com.davidpitchkhadze.dailume`.
+- CloudKit/iCloud synchronization is not yet implemented. This is a blocker for cross-device continuity.
 
-The first cloud implementation stores the full item array in one row per account. This is suitable for a small personal MVP, but it is not a conflict-free multi-device database: simultaneous edits from two devices can overwrite each other. Before production, migrate to one row per item, add updated_at/version handling, and test offline/reconnect conflict resolution.
+## Planner data model
+An item has an ID, date, title, details, kind (event/task/note), start/end times, completion status, category, and creation timestamp.
 
 ## Important limits
-- Local storage is browser/device-specific and can be cleared by the user/browser.
-- Browser notifications are permission-gated; scheduled reminders are not reliable when a PWA is closed or the operating system suspends it.
-- Apple Calendar data is not automatically accessible to a website. A web app must use an explicit calendar integration/permission flow, or a native iOS app must request EventKit authorization.
-- GitHub Pages deployment uses a project path `/Notes/`; custom domains and alternative hosting require updating Vite base and PWA paths.
+- Browser local storage can be cleared and is specific to a browser/device.
+- Native local storage is specific to the installation/device.
+- Website and native data are not shared.
+- Native reminders require notification permission and physical-device verification.
+- GitHub Pages is static hosting; it does not provide a database, authentication, or scheduled push delivery.
+- Apple Calendar access is not implemented. A native app would need a clear purpose and EventKit authorization before accessing it.

@@ -1,33 +1,51 @@
-# Release readiness checklist
+# Dailume release checklist
 
-This is a checklist, not a claim that the product is App Store ready.
+This checklist distinguishes automated evidence from work that still requires a real Apple account or physical device.
 
-## Web/PWA
-- [ ] GitHub Pages workflow succeeds on a clean build.
-- [ ] Test desktop Safari/Chrome and iPhone Safari at narrow widths.
-- [ ] Test create/edit/delete, search, date navigation, completion, refresh persistence.
-- [ ] Test no-network use and recovery.
-- [ ] Test Supabase email login, sign-out, per-user RLS, and sync on two devices.
-- [ ] Resolve multi-device concurrent-write conflicts before relying on cloud data.
-- [ ] Add a real privacy policy and contact/support page before public launch.
-- [ ] Verify PWA install, icons, manifest paths, and accessibility/keyboard behavior.
-- [ ] Test time zones and daylight-saving transitions.
+## Confirmed on the previous main-branch revision
+- [x] Web TypeScript + Vite production build passed in GitHub Actions.
+- [x] GitHub Pages deployment workflow completed successfully.
+- [x] Native iOS project compiled for iOS Simulator in GitHub Actions.
+- [ ] Re-run all workflows after the current Dailume/no-Supabase branch is merged.
 
-## Notifications
-- [ ] Define reminder semantics and timezone handling.
-- [x] Add native local notifications for scheduled event starts (implementation only).\n- [ ] Test notification permission, timezone behavior and delivery while the app is closed on a physical iPhone.\n- [ ] Implement browser/PWA reminders if they remain a product requirement.
-- [ ] Explain permission purpose before asking for notification permission.
+## Web / PWA
+- [ ] Confirm Pages is configured to use GitHub Actions.
+- [ ] Verify the homepage, CSS/JS assets, PWA manifest, icon, privacy page and support page load publicly.
+- [ ] Test Mac Safari/Chrome and iPhone Safari at narrow widths.
+- [ ] Test create/edit/delete, date navigation, search, completion and persistence after refresh.
+- [ ] Test offline/reconnect and clearing browser storage.
+- [ ] Check keyboard navigation, focus visibility, VoiceOver and reduced motion.
+- [ ] Website data is local to each browser; there is no website/native or cross-device sync.
+- [ ] Website reminders are not implemented; UI must not imply they work.
 
-## Native iOS / App Store (scaffold exists; release still blocked)
-- [ ] Decide native SwiftUI vs Capacitor wrapper; a website is not an Xcode app by itself.
-- [x] Add a starter SwiftUI Xcode project to `ios/Daymark.xcodeproj` (not yet build-verified).\n- [ ] Build the Xcode project with current Xcode/SDK and fix any compiler/project issues.
-- [ ] Create app icon asset catalog (all required sizes/appearances), launch experience, bundle ID, version/build.
-- [ ] Configure signing, entitlements, privacy manifest as applicable, and required-reason API declarations if applicable.
-- [ ] Implement native notification scheduling and request permissions contextually.
-- [ ] Implement Apple Calendar access only after explicit EventKit permission and clear user value.
-- [ ] Add privacy policy URL, support URL, app description, keywords, age rating, screenshots for required device sizes, and review notes.
-- [ ] Complete App Privacy disclosures accurately, including any third-party SDKs/data collection.
-- [ ] Validate account deletion in-app if account creation is supported, and provide required privacy disclosures.
-- [ ] Run automated tests and manual tests on real iPhone hardware; test VoiceOver, Dynamic Type, offline and auth expiry.
-- [ ] Archive in Xcode, validate upload, distribute via TestFlight, test installation/update, then submit for review.
-- [ ] Re-check current Apple App Review Guidelines and App Store Connect requirements at release time.
+## Native SwiftUI / iOS
+- [x] Native SwiftUI project exists and has a configured display name, bundle identifier, and app icon asset catalog.
+- [x] Local planner persistence and local event notification scheduling are implemented in code.
+- [x] In-app Privacy Policy and Support links are present.
+- [ ] Re-run iOS Simulator build on the latest commit.
+- [ ] Inspect the generated AppIcon in Xcode and on device; finalize the brand artwork.
+- [ ] Confirm bundle ID availability and create the matching app record in App Store Connect.
+- [ ] Configure signing and capabilities for the correct Apple Developer team.
+- [ ] Verify local notification permission and delivery on a physical iPhone, including when the app is closed and after timezone changes.
+- [ ] Test create/edit/delete/completion, persistence across app relaunch, layout, keyboard, Dynamic Type and VoiceOver on a physical iPhone.
+- [ ] Implement CloudKit/iCloud sync if cross-device sync remains required. It is not implemented; native and web data currently do not sync.
+- [ ] Decide whether Apple Calendar integration is required; if so, implement EventKit with an explicit purpose and permission flow.
+- [ ] Run an Xcode Archive for Any iOS Device, validate it, upload it, and confirm Apple processes the build.
+- [ ] Complete TestFlight beta description, test information, review notes, and invite internal testers. External testing may require beta review.
+- [ ] Install the actual TestFlight build on the iPhone and test update/upgrade behavior.
+
+## App Store Connect / legal
+- [x] Draft public privacy policy at `public/privacy.html`.
+- [x] Draft public support page at `public/support.html`.
+- [ ] Confirm both URLs are publicly accessible after deployment and policy matches the final shipped data flows.
+- [ ] Confirm unique app name availability in App Store Connect and check trademark/domain conflicts.
+- [ ] Confirm app icon and display name are consistent across the native app, website, screenshots and metadata.
+- [ ] Fill in description, subtitle, keywords, category, age-rating answers, copyright and review notes.
+- [ ] Prepare required screenshots for supported device sizes using the actual app.
+- [ ] Complete App Privacy disclosures in App Store Connect based on the final binary and actual SDK/data flows.
+- [ ] Confirm privacy policy URL and support URL in App Store Connect.
+- [x] No account creation exists in the current prototype; account deletion is not applicable unless account creation is added.
+- [ ] Re-check Apple's current App Review Guidelines immediately before submission.
+
+## Release gate
+Do not call this App Store/TestFlight ready until the unchecked native and App Store items above are completed and a real TestFlight install has been tested. Automated CI cannot verify Apple account setup, signing credentials, physical-device behavior, or Apple's processing/review outcome.

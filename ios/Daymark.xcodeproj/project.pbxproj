@@ -116,11 +116,11 @@
         CODE_SIGN_STYLE = Automatic;
         CURRENT_PROJECT_VERSION = 1;
         GENERATE_INFOPLIST_FILE = YES;
-        INFOPLIST_KEY_CFBundleDisplayName = Daymark;
+        INFOPLIST_KEY_CFBundleDisplayName = Dailume;
         INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
         IPHONEOS_DEPLOYMENT_TARGET = 26.0;
         MARKETING_VERSION = 1.0;
-        PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.daymark;
+        PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.dailume;
         PRODUCT_NAME = "$(TARGET_NAME)";
         SWIFT_EMIT_LOC_STRINGS = YES;
         SWIFT_VERSION = 5.0;
@@ -134,11 +134,11 @@
         CODE_SIGN_STYLE = Automatic;
         CURRENT_PROJECT_VERSION = 1;
         GENERATE_INFOPLIST_FILE = YES;
-        INFOPLIST_KEY_CFBundleDisplayName = Daymark;
+        INFOPLIST_KEY_CFBundleDisplayName = Dailume;
         INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
         IPHONEOS_DEPLOYMENT_TARGET = 26.0;
         MARKETING_VERSION = 1.0;
-        PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.daymark;
+        PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.dailume;
         PRODUCT_NAME = "$(TARGET_NAME)";
         SWIFT_EMIT_LOC_STRINGS = YES;
         SWIFT_VERSION = 5.0;

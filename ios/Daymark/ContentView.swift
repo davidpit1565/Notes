@@ -37,7 +37,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("Daymark")
+            .navigationTitle("Dailume")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Search your day")
             .alert("Event reminders", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
@@ -54,6 +54,15 @@ struct ContentView: View {
                         .accessibilityLabel("Enable event reminders")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Link("Privacy Policy", destination: URL(string: "https://davidpit1565.github.io/Notes/privacy.html")!)
+                        Link("Support", destination: URL(string: "https://davidpit1565.github.io/Notes/support.html")!)
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("Privacy and support")
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button { showingComposer = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add planner item")
                 }
