@@ -100,7 +100,7 @@ export default function App() {
 
       <div className="list-heading">
         <div><h2>{tab === 'Today' ? 'Your tasks' : tab === 'Upcoming' ? 'Coming up' : 'Your notes'}</h2><span>{visibleItems.length ? `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'}` : 'Nothing here yet'}</span></div>
-        <button className="text-add" onClick={openNew}><Plus size={17} /><span>Add</span></button>
+        
       </div>
 
       {visibleItems.length ? <div className="task-list">
@@ -120,7 +120,7 @@ export default function App() {
         <div className="empty-icon">{tab === 'Notes' ? <FileText size={25} /> : <Check size={25} />}</div>
         <h3>{tab === 'Today' ? 'Start with one thing.' : tab === 'Upcoming' ? 'Nothing waiting for you.' : 'A quiet place for your thoughts.'}</h3>
         <p>{tab === 'Today' ? 'Add the one thing you would like to get done today.' : tab === 'Upcoming' ? 'Tasks you schedule for later will appear here.' : 'Save an idea before it slips away.'}</p>
-        <button className="empty-add" onClick={openNew}><Plus size={17} /> {tab === 'Notes' ? 'Write a note' : 'Add a task'}</button>
+        
       </div>}
 
       <button className="floating-add" onClick={openNew} aria-label={tab === 'Notes' ? 'Add note' : 'Add task'}><Plus size={25} /><span>{tab === 'Notes' ? 'New note' : 'New task'}</span></button>
