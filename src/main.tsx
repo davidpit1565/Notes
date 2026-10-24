@@ -34,7 +34,7 @@ root.render(<React.StrictMode><AppErrorBoundary><App /></AppErrorBoundary></Reac
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(new URL('sw.js', import.meta.env.BASE_URL).toString()).catch(() => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
       // The app remains usable without offline caching.
     })
   })
