@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     @State private var showingComposer = false
     @State private var searchText = ""
+    @State private var reminderMessage = ""
 
     private var dayItems: [PlannerItem] {
         store.items(on: selectedDate).filter {
@@ -39,7 +40,19 @@ struct ContentView: View {
             .navigationTitle("Daymark")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Search your day")
+            .alert("Event reminders", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
+                Button("OK") { reminderMessage = "" }
+            } message: { Text(reminderMessage) }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        Task {
+                            let enabled = await ReminderManager.requestPermissionAndSchedule(store.items)
+                            reminderMessage = enabled ? "Event reminders are enabled on this device." : "Notifications are off. You can enable them in Settings."
+                        }
+                    } label: { Image(systemName: "bell.badge") }
+                        .accessibilityLabel("Enable event reminders")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingComposer = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add planner item")
@@ -61,6 +74,10 @@ struct ContentView: View {
             .sheet(isPresented: $showingComposer) {
                 ItemComposer(selectedDate: selectedDate) { title, details, kind, date, start, end in
                     store.add(title: title, details: details, kind: kind, date: date, start: start, end: end)
+                    if kind == .event {
+                        let item = store.items(on: date).first(where: { $0.title == title && $0.kind == .event })
+                        if let item { Task { await ReminderManager.schedule(item) } }
+                    }
                 }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
