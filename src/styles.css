@@ -20,7 +20,9 @@ button { touch-action: manipulation; }
 }
 @media (max-width: 700px) {
   .sidebar { width: min(86vw, 300px); transform: translateX(-105%); transition: transform .22s ease; }
-  .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar.sidebar-open { transform: translateX(0); }
+  .mobile-scrim { position: fixed; inset: 0; z-index: 18; background: rgba(22,28,23,.28); border: 0; backdrop-filter: blur(2px); }
+  .mobile-close { display: inline-flex; }
   .main-panel { margin-left: 0; }
   .topbar { height: 58px; padding: 0 16px; position: sticky; top: 0; z-index: 15; }
   .search-box { max-width: 42vw; }
