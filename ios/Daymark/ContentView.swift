@@ -37,7 +37,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("Daymark")
+            .navigationTitle("Dailume")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Search your day")
             .alert("Event reminders", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
