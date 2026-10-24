@@ -4,8 +4,24 @@ import { newItem, STORAGE_KEY, todayKey, type PlannerItem, type PlannerState } f
 
 type View = 'Today' | 'Upcoming' | 'Notes' | 'All tasks'
 const readLocal = (): PlannerState => {
-  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw) as PlannerState } catch { /* use empty state */ }
-  return { items: [] }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return { items: [] }
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || !('items' in parsed) || !Array.isArray((parsed as { items?: unknown }).items)) {
+      return { items: [] }
+    }
+    const items = (parsed as { items: unknown[] }).items.filter((item): item is PlannerItem => {
+      if (!item || typeof item !== 'object') return false
+      const value = item as Partial<PlannerItem>
+      return typeof value.id === 'string' && typeof value.date === 'string' &&
+        typeof value.title === 'string' && ['event', 'task', 'note'].includes(String(value.kind))
+    })
+    return { items }
+  } catch {
+    // Ignore malformed or unavailable local storage rather than letting startup fail.
+    return { items: [] }
+  }
 }
 const fmtDay = (key: string, options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' }) => new Date(key + 'T12:00:00').toLocaleDateString(undefined, options)
 const shiftDay = (key: string, n: number) => { const d = new Date(key + 'T12:00:00'); d.setDate(d.getDate() + n); return todayKey(d) }
