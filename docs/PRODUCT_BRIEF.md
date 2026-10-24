@@ -1,4 +1,4 @@
-# Daymark — product brief and research notes
+# Dailume — product brief and research notes
 
 ## 1. The problem we are solving
 
@@ -7,13 +7,13 @@ A real day contains three different kinds of information:
 - **Flexible actions:** tasks that matter today but do not need an exact calendar slot.
 - **Free-form context:** notes, instructions, ideas, links, and details attached to the day or an item.
 
-A calendar handles the first well, but often makes the other two feel rigid. A notes app captures context but does not give it a daily plan or completion state. A conventional to-do list can separate tasks from the time they actually need. Daymark makes the day the home for all three without forcing every thought into a time slot.
+A calendar handles the first well, but often makes the other two feel rigid. A notes app captures context but does not give it a daily plan or completion state. A conventional to-do list can separate tasks from the time they actually need. Dailume makes the day the home for all three without forcing every thought into a time slot.
 
 ## 2. Existing products and what they teach us
 
 Research snapshot: 25 October 2026. Feature/pricing claims can change; verify vendor pages before making future commercial decisions.
 
-| Product | Strength / pattern worth learning from | Gap relative to Daymark's initial goal |
+| Product | Strength / pattern worth learning from | Gap relative to Dailume's initial goal |
 |---|---|---|
 | [Structured](https://structured.app/) | A visual daily timeline mixing tasks and events; low-friction day view | Advanced features may be paid; availability differs by platform |
 | [Tiimo](https://www.tiimoapp.com/) | Visual planning, task breakdown and time awareness | More opinionated visual/attention-support approach than a quiet general-purpose workspace |
