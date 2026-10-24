@@ -1,4 +1,4 @@
-const CACHE = 'dailume-shell-v2';
+const CACHE = 'dailume-shell-v3';
 const SHELL = ['/Notes/', '/Notes/manifest.webmanifest', '/Notes/icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
