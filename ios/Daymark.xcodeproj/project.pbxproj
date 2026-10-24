@@ -70,9 +70,7 @@
       isa = PBXShellScriptBuildPhase;
       buildActionMask = 2147483647;
       files = ();
-      inputPaths = ("$(SRCROOT)/DaymarkIconBase64.txt");
       name = "Generate App Icon PNG";
-      outputPaths = ("$(SRCROOT)/Daymark/Assets.xcassets/AppIcon.appiconset/DaymarkIcon.png");
       runOnlyForDeploymentPostprocessing = 0;
       shellPath = /bin/bash;
       shellScript = "set -euo pipefail\nbase64 -D \"$SRCROOT/DaymarkIconBase64.txt\" > \"$SRCROOT/Daymark/Assets.xcassets/AppIcon.appiconset/DaymarkIcon.png\"\n";
