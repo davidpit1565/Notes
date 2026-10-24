@@ -1,6 +1,6 @@
 {
-  "name": "Daymark Daily Planner",
-  "short_name": "Daymark",
+  "name": "Dailume Daily Planner",
+  "short_name": "Dailume",
   "description": "Your schedule, tasks and notes in one calm place.",
   "start_url": "/Notes/",
   "scope": "/Notes/",
