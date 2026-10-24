@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Check, ChevronLeft, ChevronRight, Circle, Clock3, FileText, Plus, X } from 'lucide-react'
+import { Check, ChevronRight, Circle, Clock3, FileText, Plus, X } from 'lucide-react'
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem } from './lib/types'
 
 type Tab = 'Today' | 'Upcoming' | 'Notes'
