@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import SwiftUI
 
 enum PlannerKind: String, CaseIterable, Codable, Identifiable {
