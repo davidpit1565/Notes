@@ -6,7 +6,7 @@ Daymark combines a daily schedule, flexible tasks, and date-linked notes in one 
 
 - Responsive web app / Progressive Web App (Mac, iPhone, iPad)
 - Daily timeline with timed blocks and flexible tasks
-- Notes attached to a date or kept in an inbox
+- Notes attached to a date
 - Local-first storage for immediate use
 - Optional Supabase authentication and cross-device sync
 - GitHub Pages deployment workflow
