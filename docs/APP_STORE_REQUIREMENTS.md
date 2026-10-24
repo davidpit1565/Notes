@@ -11,7 +11,7 @@ Checked 25 October 2026. Apple requirements change; re-check all linked sources 
 - [Account deletion requirement](https://developer.apple.com/support/offering-account-deletion-in-your-app/)
 - [GitHub Pages deployment guidance](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
-## Required work before native submission
+## App identity and public links\n\n- Working display name: **Dailume** (chosen after finding existing Daymark listings; App Store Connect availability and trademark clearance are still not verified).\n- Bundle identifier currently configured in Xcode: `com.davidpitchkhadze.dailume`; confirm it is available to the developer team and create the matching App Store Connect app record.\n- Privacy policy URL: https://davidpit1565.github.io/Notes/privacy.html\n- Support URL: https://davidpit1565.github.io/Notes/support.html\n- The privacy/support pages are committed in `public/`; verify they load publicly after the next Pages deployment.\n\n## Required work before native submission
 
 ### Product and binary
 - A real Xcode project or supported native wrapper, with an explicit bundle identifier, version/build, launch behavior, signing and distribution configuration.
@@ -51,8 +51,8 @@ Checked 25 October 2026. Apple requirements change; re-check all linked sources 
 - [x] Release checklist and architecture risks documented.
 - [x] Verify web typecheck/production build and GitHub Pages deployment on the merged commit.\n- [x] Add a native SwiftUI Xcode project and automated iOS Simulator build workflow (automated build passes; physical-device behavior remains unverified).
 - [ ] Verify Supabase account sync on two physical devices; resolve simultaneous edit conflicts.
-- [ ] Add real privacy policy and support contact before public release.
-- [ ] Add account deletion flow before any native release that supports account creation.
+- [x] Add draft public privacy policy and support page to `public/privacy.html` and `public/support.html` (verify deployed URLs; revise policy if data flows change).
+- [x] Current prototype has no account creation, so account deletion is not applicable unless accounts are added later.
 - [x] Add a draft native app icon asset generation step and Xcode asset catalog.\n- [ ] Finalize app icon/brand and verify rendered icon in Xcode and on device.\n- [ ] Complete native shared cloud sync/auth, privacy/support URLs, signing, privacy declarations and TestFlight validation.
 
-**Honest status:** the repository now contains both a web/PWA and a starter native SwiftUI iOS app. The web build/deployment and automated iOS Simulator build pass, but the product is not App Store-ready: native cross-device sync/auth, physical-device testing, final branding/name availability, privacy/support URLs, release signing and TestFlight remain outstanding. Apple approval cannot be guaranteed by an automated checklist.
+**Honest status:** the repository contains a web/PWA and a native SwiftUI iOS app, now renamed Dailume, with local-only storage and draft public policy/support pages. Recent web build/deployment and iOS Simulator build runs passed. This branch still needs fresh CI/deployment validation, public URL checks, physical-device testing, final icon review, a confirmed App Store Connect app record/name, signing/archive validation, accurate privacy declarations, and TestFlight processing. Website and native data do not sync. Apple approval cannot be guaranteed by an automated checklist.
