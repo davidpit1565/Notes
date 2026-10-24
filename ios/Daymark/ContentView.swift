@@ -54,6 +54,15 @@ struct ContentView: View {
                         .accessibilityLabel("Enable event reminders")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Link("Privacy Policy", destination: URL(string: "https://davidpit1565.github.io/Notes/privacy.html")!)
+                        Link("Support", destination: URL(string: "https://davidpit1565.github.io/Notes/support.html")!)
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("Privacy and support")
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button { showingComposer = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add planner item")
                 }
