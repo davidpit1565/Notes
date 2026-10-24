@@ -1,41 +1,35 @@
-# Setup: run, publish, and enable account sync
+# Setup: Dailume web and native iOS
 
-## 1. Run locally
-Install Node.js 20+, then:
+## Website / PWA
+Requirements: Node.js 20+.
+
 ```sh
 npm install
-cp .env.example .env.local
 npm run dev
 ```
-Open the local URL printed by Vite. With blank Supabase variables, data stays in this browser.
 
-## 2. Publish the website
+The website is local-only. Planner items are stored in browser local storage; no account or server sync is configured.
+
+## Publish with GitHub Pages
 1. Open repository Settings → Pages.
 2. Choose **GitHub Actions** as the deployment source.
-3. Push to `main`; the workflow builds and deploys the site.
-4. After the workflow succeeds, open the Pages URL shown in repository Settings. It should use the project path `/Notes/`.
+3. Push to `main` or run the deployment workflow manually.
+4. Check [GitHub Actions](https://github.com/davidpit1565/Notes/actions). The expected URL is https://davidpit1565.github.io/Notes/.
 
-## 3. Enable login and sync
-1. Create a Supabase project at https://supabase.com/dashboard.
-2. In Project Settings → API, copy the Project URL and the publishable/anon client key.
-3. In Supabase SQL Editor, run the contents of `supabase/schema.sql`.
-4. In Authentication → URL Configuration, add your published Pages URL to Site URL and Redirect URLs.
-5. In GitHub Settings → Secrets and variables → Actions → Variables, add:
-   - `VITE_SUPABASE_URL` = your project URL
-   - `VITE_SUPABASE_ANON_KEY` = your publishable/anon key
-6. Re-run the deployment workflow (or push a new commit).
-7. In the app, choose My workspace → enter your email → open the sign-in link on the same browser/device where you want to sign in.
+The public privacy policy is https://davidpit1565.github.io/Notes/privacy.html and support page is https://davidpit1565.github.io/Notes/support.html.
 
-These are client-side public configuration values. **Never put a Supabase service-role key in Vite variables or browser code.** RLS policies in the supplied SQL restrict each row to its owner.
+## Native iOS app
+1. On your Mac, install/open a compatible Xcode version.
+2. Open `ios/Daymark.xcodeproj`.
+3. Select the `Daymark` scheme and an iPhone Simulator.
+4. Build and test. The app's home-screen display name is Dailume.
+5. For TestFlight, select your Apple Developer team in Signing & Capabilities, confirm the bundle ID `com.davidpitchkhadze.dailume` is available to your team, increment the build number, archive for Any iOS Device, validate, and upload through Xcode Organizer or the authorized Transporter/App Store Connect API workflow.
+6. Wait for Apple processing, complete the required Test Information and Beta App Review fields, then invite testers.
 
-## 4. Cross-device sign-in
-Repeat sign-in on the other device with the same email. After the account loads, the cloud state should appear there. Test a new item on device A, wait for sync, then refresh device B. The current MVP stores one JSON state per user; avoid simultaneous editing until conflict handling is upgraded.
-
-## 5. Install on iPhone
-Open the published URL in Safari → Share → Add to Home Screen. This installs a web app shortcut, not a native App Store app. iOS notification support depends on OS version, installation method, permissions, and the implementation; this build does not promise background scheduled reminders.
+## Data limits
+The native app stores data locally on the device. The website stores data in that browser. They do not sync with each other. Do not assume iCloud/CloudKit sync exists until it is implemented, configured for the correct Apple Developer team/container, and verified on at least two devices signed in to the same iCloud account.
 
 ## Troubleshooting
-- A blank page: inspect the GitHub Actions build/deploy run; confirm Pages source is GitHub Actions.
-- 404 on assets: check that the repository is named `Notes` and the Vite base is `/Notes/`.
-- Login link fails: add the exact Pages URL to Supabase redirect allow-list.
-- Sync unavailable: verify the two Actions variables and the SQL schema/RLS.
+- Website 404 or blank screen: check Pages source, then inspect the latest deploy and build workflows.
+- iOS build fails: open the project in current Xcode, check signing/team and build logs.
+- TestFlight upload fails: confirm the bundle ID exists in App Store Connect, the Apple Developer membership is active, the build/version is unique, and signing credentials are valid.
