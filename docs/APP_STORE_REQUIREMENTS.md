@@ -1,58 +1,62 @@
-# Native iOS and App Store requirements research
+# Dailume — native iOS and App Store readiness
 
-Checked 25 October 2026. Apple requirements change; re-check all linked sources immediately before submission. This checklist is planning evidence, not an approval guarantee.
+Checked 25 October 2026. This checklist records implementation and verification status; it does not guarantee Apple approval.
 
-## Official Apple sources
-
+## Official Apple references
 - [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
-- [Before You Submit / App Review](https://developer.apple.com/app-store/review/)
 - [App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)
 - [Manage app privacy in App Store Connect](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/)
 - [Account deletion requirement](https://developer.apple.com/support/offering-account-deletion-in-your-app/)
-- [GitHub Pages deployment guidance](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [Upload builds to App Store Connect](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/)
+- [TestFlight](https://developer.apple.com/testflight/)
+- [Privacy manifests](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files)
+- [Required-reason APIs](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api)
+- [CloudKit and Core Data](https://developer.apple.com/documentation/coredata/setting-up-core-data-with-cloudkit)
+- [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
-## App identity and public links\n\n- Working display name: **Dailume** (chosen after finding existing Daymark listings; App Store Connect availability and trademark clearance are still not verified).\n- Bundle identifier currently configured in Xcode: `com.davidpitchkhadze.dailume`; confirm it is available to the developer team and create the matching App Store Connect app record.\n- Privacy policy URL: https://davidpit1565.github.io/Notes/privacy.html\n- Support URL: https://davidpit1565.github.io/Notes/support.html\n- The privacy/support pages are committed in `public/`; verify they load publicly after the next Pages deployment.\n\n## Required work before native submission
+## Identity and URLs
+- Working display name: **Dailume**. This avoids the Daymark name variants found in App Store search, but availability and trademark clearance are not confirmed until checked in App Store Connect and appropriate trademark sources.
+- Bundle identifier in Xcode: `com.davidpitchkhadze.dailume`. Confirm availability under the active Apple Developer team and create a matching App Store Connect app record.
+- Privacy policy: https://davidpit1565.github.io/Notes/privacy.html
+- Support page: https://davidpit1565.github.io/Notes/support.html
+- These pages are committed under `public/`; confirm the public URLs after the next successful Pages deployment.
 
-### Product and binary
-- A real Xcode project or supported native wrapper, with an explicit bundle identifier, version/build, launch behavior, signing and distribution configuration.
-- Current supported iOS SDK/Xcode build; archive and upload validation.
-- App icon asset catalog at the required sizes and appearances; launch screen; app display name; supported device layouts.
-- Real iPhone testing, not just browser preview: installation, update, offline behavior, rotation/size changes where supported, Dynamic Type, VoiceOver, keyboard, and crash/error paths.
+## Implemented in repository
+- [x] Native SwiftUI project scaffold.
+- [x] Display name and bundle identifier configured.
+- [x] Draft AppIcon asset catalog and deterministic icon generation build phase.
+- [x] Local event-notification scheduling code.
+- [x] Public draft privacy policy and support page.
+- [x] In-app links to Privacy Policy and Support.
+- [x] `PrivacyInfo.xcprivacy` declares UserDefaults required-reason API use for app-owned preferences (CA92.1).
+- [x] No account creation or third-party analytics SDK in the current native prototype.
+- [x] Web build/deployment and iOS Simulator compilation passed on a previous main-branch commit.
 
-### Store listing and review
-- Accurate name, subtitle, description, category, keywords, age-rating answers, copyright, screenshots for required device classes, and preview video if used.
-- Public support URL and public privacy policy URL; both should remain available.
-- Review notes that explain the actual feature set. Provide a working demo account or full demo mode if account-based features need review access.
-- Do not advertise unimplemented calendar access, push reminders, cloud sync, or AI features in screenshots/metadata.
+## Must be completed before TestFlight is considered ready
+- [ ] Merge the current Dailume branch and confirm web build, Pages deployment and iOS Simulator build pass on the final commit.
+- [ ] Confirm privacy/support URLs are publicly accessible and accurately describe the shipped app.
+- [ ] Confirm app name availability and create the app record in App Store Connect.
+- [ ] Confirm bundle identifier, signing team, capabilities, and App Store Connect app record match.
+- [ ] Open the project in Xcode and inspect the actual generated app icon; polish/finalize branding if needed.
+- [ ] Run an archive for Any iOS Device, validate it, upload it, and confirm Apple processes the build.
+- [ ] Test on a physical iPhone: startup, create/edit/delete, completion, relaunch persistence, notification permission/delivery, timezone changes, VoiceOver, Dynamic Type and layout.
+- [ ] Fill in TestFlight beta description, test information, contact details and review notes. Invite internal testers; external testers may require Beta App Review.
+- [ ] Install the actual TestFlight build and test an update from one build to the next.
+- [ ] Complete App Privacy declarations in App Store Connect based on the final binary and actual data flows.
+- [ ] Add App Store description, subtitle, keywords, category, age rating, copyright and actual-device screenshots before App Store submission.
+- [ ] Re-check Apple's current App Review Guidelines immediately before submission.
 
-### Privacy and account
-- Complete App Privacy disclosures in App Store Connect based on actual data flows and every included third-party SDK.
-- Privacy policy must identify collected data, collection method, purpose, sharing, retention, deletion and how consent can be revoked.
-- If the app supports account creation, Apple requires users to be able to initiate account deletion within the app. Deletion should remove the account and associated user data except data legally required to be retained.
-- Supabase auth/data handling must be reflected in the privacy disclosures. Do not claim data is never sent to a server if cloud sync is enabled.
-- Keep secrets out of the client bundle; a Supabase publishable/anon key may be client-visible only when Row Level Security is correctly configured. Never ship a service-role key.
+## Explicit product limitations
+- Native planner data is currently local to that installation/device. CloudKit/iCloud sync is not implemented.
+- The website is a separate local-only PWA. Website and native data do not sync.
+- Native local notifications are implemented but have not been verified on physical hardware.
+- Website scheduled reminders are not implemented.
+- Apple Calendar/EventKit integration is not implemented.
+- No app archive has been uploaded and no TestFlight build is currently confirmed available.
 
-### Calendar and notifications
-- A website cannot silently access the full Apple Calendar database. Native calendar integration requires an explicit purpose, EventKit authorization, and clear denial behavior.
-- Request notification permission in context. Test scheduled local notifications on real devices.
-- If promising reminders while the app is closed, implement and test a supported delivery path; browser notification permission alone is not enough.
+## Privacy and account requirements
+- The current prototype has no account creation, so in-app account deletion is not applicable. If account creation is added, Apple requires an in-app way to initiate account deletion.
+- The native prototype stores planner data locally and does not include analytics or a third-party data SDK. App Privacy declarations must be checked against the exact final binary and any changes before submission.
+- The privacy manifest declares the UserDefaults API reason used to save app-owned planner data. Review it again if the storage implementation changes.
 
-### TestFlight
-- Archive and validate the native app in Xcode.
-- Upload to App Store Connect; resolve processing and signing errors.
-- Create a TestFlight build, add internal/external testers as appropriate, test install, sign-in, sync, reminders, upgrade, and deletion.
-- TestFlight is beta distribution, not proof that App Review will approve the final release.
-
-## Current Daymark status
-- [x] Web-first product direction and initial responsive interface.
-- [x] Local persistence, date picker, time blocks, tasks, notes, search.
-- [x] PWA manifest, icon, offline app-shell service worker.
-- [x] Initial GitHub Pages workflow added.
-- [x] Release checklist and architecture risks documented.
-- [x] Verify web typecheck/production build and GitHub Pages deployment on the merged commit.\n- [x] Add a native SwiftUI Xcode project and automated iOS Simulator build workflow (automated build passes; physical-device behavior remains unverified).
-- [ ] Verify Supabase account sync on two physical devices; resolve simultaneous edit conflicts.
-- [x] Add draft public privacy policy and support page to `public/privacy.html` and `public/support.html` (verify deployed URLs; revise policy if data flows change).
-- [x] Current prototype has no account creation, so account deletion is not applicable unless accounts are added later.
-- [x] Add a draft native app icon asset generation step and Xcode asset catalog.\n- [ ] Finalize app icon/brand and verify rendered icon in Xcode and on device.\n- [ ] Complete native shared cloud sync/auth, privacy/support URLs, signing, privacy declarations and TestFlight validation.
-
-**Honest status:** the repository contains a web/PWA and a native SwiftUI iOS app, now renamed Dailume, with local-only storage and draft public policy/support pages. Recent web build/deployment and iOS Simulator build runs passed. This branch still needs fresh CI/deployment validation, public URL checks, physical-device testing, final icon review, a confirmed App Store Connect app record/name, signing/archive validation, accurate privacy declarations, and TestFlight processing. Website and native data do not sync. Apple approval cannot be guaranteed by an automated checklist.
+**Release gate:** Do not call this app TestFlight-ready until the unchecked items are completed and the actual uploaded TestFlight build has been installed and tested. Automated CI cannot verify developer-account setup, signing credentials, Apple processing, physical-device behavior, or review outcomes.
