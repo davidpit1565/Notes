@@ -1,43 +1,23 @@
-# Apple design research and cross-platform strategy
+# Apple-inspired design research for Dailume
 
-Research checked: 25 October 2026. Re-check current Apple documentation before release; Apple changes APIs and review rules over time.
+Research notes based on Apple's public developer documentation and Human Interface Guidelines, not leaked or private Apple assets.
 
-## Primary sources (official Apple)
-- [Meet Liquid Glass — WWDC25](https://developer.apple.com/videos/play/wwdc2025/219/)
-- [Build a SwiftUI app with the new design — WWDC25](https://developer.apple.com/videos/play/wwdc2025/323/)
-- [Get to know the new design system — WWDC25](https://developer.apple.com/videos/play/wwdc2025/356/)
-- [Human Interface Guidelines: Designing for iOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-ios)
-- [Apple Design Resources](https://developer.apple.com/design/resources/)
-- [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
-- [App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)
-- [Offering account deletion in your app](https://developer.apple.com/support/offering-account-deletion-in-your-app/)
+## Primary references
+- [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
+- [Meet Liquid Glass — WWDC25](https://developer.apple.com/videos/play/wwdc2025/323/)
+- [App Review Guidelines — Design](https://developer.apple.com/app-store/review/guidelines/#design)
+- [Accessibility — HIG](https://developer.apple.com/design/human-interface-guidelines/accessibility)
 
-## What this means for Daymark
-Apple describes Liquid Glass as a dynamic material primarily for the functional layer: navigation, toolbars, tab bars, search and controls. The app's actual content should remain readable and visually primary. Avoid putting glass behind every card or paragraph; use system materials where possible instead of approximating Apple's material with heavy CSS blur.
+## Practical design direction
+- Prefer native SwiftUI system components and platform behaviors over imitating screenshots or copying Apple's private/internal assets.
+- Use system materials and Liquid Glass selectively for navigation and controls where the OS design calls for it; keep reading surfaces and planner content calm and legible.
+- Respect safe areas, Dynamic Type, VoiceOver labels, keyboard navigation, contrast, reduced motion, and iPad split/landscape layouts.
+- Keep the website responsive with system font stacks, restrained translucent navigation, clear touch targets, and accessible focus states. Web CSS can approximate visual material effects but is not the native Liquid Glass rendering engine.
 
-### Native SwiftUI
-- Use native NavigationStack, TabView and toolbar controls so the current OS appearance can adapt automatically.
-- Use Liquid Glass for navigation/action controls; keep planner content opaque and high-contrast.
-- Support system appearance, Dynamic Type, VoiceOver, keyboard navigation on iPad with keyboard, safe areas and compact widths.
-- Build and test with current Xcode/iOS SDK on actual hardware.
-- Do not copy leaked or private assets. Use public Apple Design Resources, system SF Symbols and documented APIs.
+## Brand
+- The working name is **Dailume**, selected after finding existing App Store listings using Daymark variants.
+- Search results are not legal clearance. Confirm the exact name in App Store Connect and perform trademark/domain checks before launch.
+- The repository includes a draft icon; inspect the rendered 1024px AppIcon in Xcode and on a real device before calling it final.
 
-### Website / PWA
-- A website cannot access SwiftUI's Liquid Glass API. CSS backdrop-filter can create a similar translucent visual language, but it is only a visual approximation and differs by browser/device.
-- Keep glass to navigation/toolbars, use @supports fallbacks and readable opaque content surfaces. Respect reduced motion, contrast, safe-area insets and touch target sizes.
-- Responsive targets: narrow iPhone (320–390 CSS px), larger iPhone, iPad portrait/landscape, MacBook, and large iMac display. Use a sidebar on wide screens, compact bottom navigation or a menu on phones, and fluid content widths on tablet.
-
-## Architecture decision
-Maintain two front ends:
-1. React/Vite PWA for browser access on MacBook/iMac/iPhone/iPad.
-2. A true SwiftUI iOS target for native iPhone/iPad behavior and eventual App Store distribution.
-
-These are not the same executable. SwiftUI's native Liquid Glass implementation cannot simply be used as a website. To keep both fronts consistent, share product behavior and design tokens, and connect both to the same backend only after the sync contract, authentication, conflict handling and privacy model are validated.
-
-## Explicitly not yet verified
-- No local Xcode build or real-device test has been completed by this automated workflow.
-- No App Store submission, TestFlight distribution, Apple signing, or review approval has occurred.
-- No cross-device native/web sync test has been completed.
-
-## Naming and app-icon risk
-A current App Store search already finds multiple existing apps using the Daymark name, including “Daymark: Daily Notes & Agenda” and “Daymark Planner” ([App Store listing 1](https://apps.apple.com/us/app/daymark-daily-notes-agenda/id6816867705), [App Store listing 2](https://apps.apple.com/us/app/daymark-planner/id6765720167)). Treat Daymark as a working project name only: confirm name availability in App Store Connect and conduct trademark/domain checks before launch. The included icon is a draft, not a final brand decision.
+## Release note
+The website and native app are separate implementations. The website uses local browser storage; the SwiftUI app uses local device storage. They do not sync. Native iCloud/CloudKit sync is a separate feature and must not be advertised until implemented and tested.
