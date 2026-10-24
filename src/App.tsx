@@ -15,7 +15,10 @@ const readLocal = (): PlannerState => {
       if (!item || typeof item !== 'object') return false
       const value = item as Partial<PlannerItem>
       return typeof value.id === 'string' && typeof value.date === 'string' &&
-        typeof value.title === 'string' && ['event', 'task', 'note'].includes(String(value.kind))
+        typeof value.title === 'string' && typeof value.details === 'string' &&
+        typeof value.start === 'string' && typeof value.end === 'string' &&
+        typeof value.done === 'boolean' && typeof value.category === 'string' &&
+        typeof value.createdAt === 'number' && ['event', 'task', 'note'].includes(String(value.kind))
     })
     return { items }
   } catch {
