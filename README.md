@@ -1,42 +1,48 @@
-# Daymark — your day, with room to think
+# Dailume — your day, with room to think
 
-Daymark combines a daily schedule, flexible tasks, and date-linked notes in one calm workspace. It is designed for people whose plans contain both timed commitments and untimed thinking.
+Dailume combines a daily schedule, flexible tasks, and date-linked notes in one calm workspace.
 
-## Current delivery
+## What is in this repository
 
-- Native SwiftUI iOS project scaffold in `ios/Daymark.xcodeproj` (local-only prototype; not App Store ready)
+- A responsive web app / PWA for Mac, iPhone, and iPad.
+- A separate native SwiftUI iOS project in `ios/Daymark.xcodeproj`.
+- Timed events, tasks, notes, date navigation, search, completion, and local persistence.
+- Native local notifications for scheduled event starts (not yet validated on physical hardware).
+- Public privacy and support pages.
+- GitHub Actions workflows for web build/deploy and iOS Simulator compilation.
 
-- Responsive web app / Progressive Web App (Mac, iPhone, iPad)
-- Daily timeline with timed blocks and flexible tasks
-- Notes attached to a date
-- Local-first storage for immediate use
-- Optional Supabase authentication and cross-device sync
-- GitHub Pages deployment workflow
+## Data and sync — important
 
-**Honesty about sync:** local mode stores data on the current browser/device only. Cross-device sync and account login require a Supabase project and environment secrets; these are documented in `docs/SETUP.md`. Do not enter sensitive notes on a shared device.
+There is **no Supabase dependency or account system** in this release branch. The website saves entries in that browser's local storage. The native iOS app saves entries locally on that device. They do **not** sync with each other or across devices yet. Native iCloud/CloudKit sync is a separate engineering step and must be implemented and tested before promising cross-device sync.
 
-## Run locally
+## Run the website locally
 
-Requirements: Node.js 20+.
+Requires Node.js 20+.
 
 ```sh
 npm install
-cp .env.example .env.local
 npm run dev
 ```
 
-Without Supabase environment values, the app runs in local-only mode. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to enable email authentication and cloud sync.
+## Publish the website
 
-## Deploy
+The repository's GitHub Actions workflow builds and deploys to GitHub Pages. The expected project URL is:
 
-Enable GitHub Pages with **GitHub Actions** as the build/deployment source in repository Settings → Pages. The included workflow builds the Vite app and deploys it from `main`.
+https://davidpit1565.github.io/Notes/
 
-For cloud sync, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repository Actions variables (Settings → Secrets and variables → Actions → Variables). These are public client configuration values, not service-role secrets. Never expose a Supabase service-role key in a browser app.
+If it does not load, check repository Settings → Pages and confirm **GitHub Actions** is selected as the source, then inspect the latest deployment in Actions.
 
-## Product direction
+## Open the native app
 
-See [product brief](docs/PRODUCT_BRIEF.md), [architecture](docs/ARCHITECTURE.md), [setup](docs/SETUP.md), and [release checklist](docs/RELEASE_CHECKLIST.md).
+On a Mac with Xcode installed, open `ios/Daymark.xcodeproj`, choose the `Daymark` scheme, select an iPhone Simulator, and build. The installed app display name is **Dailume**. To distribute through TestFlight, a signed archive must be uploaded through an authorized Apple Developer / App Store Connect session; GitHub Actions does not upload a signed build.
 
-## Status
+## Public pages
 
-Early implementation. GitHub Pages, auth, sync, reminders, and native packaging must be validated in their target environments before claiming production readiness.
+- Privacy policy: https://davidpit1565.github.io/Notes/privacy.html
+- Support: https://davidpit1565.github.io/Notes/support.html
+- App Store readiness checklist: [docs/APP_STORE_REQUIREMENTS.md](docs/APP_STORE_REQUIREMENTS.md)
+- Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
+
+## Current status
+
+The web production build, GitHub Pages deployment, and automated iOS Simulator build have passed on a recent main-branch commit. This does not prove physical-device behavior or App Store readiness. Remaining blockers include CloudKit sync if required, real iPhone testing, final icon/brand review, signing/archive validation, App Store Connect metadata/privacy declarations, and TestFlight processing.
