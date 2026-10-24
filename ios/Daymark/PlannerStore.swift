@@ -44,10 +44,12 @@ final class PlannerStore {
             }
     }
 
-    func add(title: String, details: String, kind: PlannerKind, date: Date, start: Date, end: Date) {
+    @discardableResult
+    func add(title: String, details: String, kind: PlannerKind, date: Date, start: Date, end: Date) -> PlannerItem {
         let item = PlannerItem(date: Calendar.current.startOfDay(for: date), title: title, details: details, kind: kind, start: start, end: end)
         items.append(item)
         save()
+        return item
     }
 
     func toggle(_ item: PlannerItem) {
