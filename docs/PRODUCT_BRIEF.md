@@ -60,7 +60,7 @@ The daily view is the default. Upcoming, All tasks, and Notes are alternate lens
 
 - Web first: React + TypeScript + Vite; static hosting on GitHub Pages is inexpensive and works across Mac and iPhone browsers.
 - Local-first fallback: items remain usable without account setup. Browser local storage is device/profile-specific and can be cleared.
-- Optional cloud account: Supabase email OTP + Postgres Row Level Security. GitHub is source control and static hosting, not a database.
+- The web app is local-only and uses browser storage; the native SwiftUI app is local-only and uses device storage. CloudKit sync is not implemented.
 - Current cloud prototype stores the full item array in one row per account. That is simple, but simultaneous edits from two devices can overwrite each other. Before production, use one row per item and conflict/version handling.
 - iPhone home-screen install is a web app, not a native App Store binary. A website cannot silently read the entire Apple Calendar; use an explicit calendar integration or native EventKit permission.
 - Browser notification permission is not equivalent to reliable background reminders. Closed-app delivery needs push infrastructure or native local notifications.
