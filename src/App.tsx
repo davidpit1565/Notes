@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useCallback, useMemo, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, Bell, CalendarDays, Check, Circle, Clock3, FileText, ListTodo, Menu, Plus, Search, Settings2, Sparkles, StickyNote, Sun, X } from 'lucide-react'
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem, type PlannerState } from './lib/types'
 
