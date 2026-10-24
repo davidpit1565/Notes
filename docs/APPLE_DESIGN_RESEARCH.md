@@ -38,3 +38,6 @@ These are not the same executable. SwiftUI's native Liquid Glass implementation 
 - No local Xcode build or real-device test has been completed by this automated workflow.
 - No App Store submission, TestFlight distribution, Apple signing, or review approval has occurred.
 - No cross-device native/web sync test has been completed.
+
+## Naming and app-icon risk
+A current App Store search already finds multiple existing apps using the Daymark name, including “Daymark: Daily Notes & Agenda” and “Daymark Planner” ([App Store listing 1](https://apps.apple.com/us/app/daymark-daily-notes-agenda/id6816867705), [App Store listing 2](https://apps.apple.com/us/app/daymark-planner/id6765720167)). Treat Daymark as a working project name only: confirm name availability in App Store Connect and conduct trademark/domain checks before launch. The included icon is a draft, not a final brand decision.
