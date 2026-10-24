@@ -51,12 +51,13 @@ export default function App() {
     setCloudReady(true)
   }, [persist])
   useEffect(() => {
-    if (!supabase) return
-    supabase.auth.getSession().then(({ data }) => {
+    const client = supabase
+    if (!client) return
+    client.auth.getSession().then(({ data }) => {
       const session = data.session
       if (session) { setSignedIn(true); setUserEmail(session.user.email ?? ''); void loadCloud(session.user.id) }
     })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = client.auth.onAuthStateChange((_event, session) => {
       setSignedIn(Boolean(session)); setUserEmail(session?.user.email ?? '')
       if (session) window.setTimeout(() => { void loadCloud(session.user.id) }, 0)
       else setCloudReady(false)
@@ -64,11 +65,12 @@ export default function App() {
     return () => listener.subscription.unsubscribe()
   }, [loadCloud])
   useEffect(() => {
-    if (!supabase || !signedIn || !cloudReady) return
+    const client = supabase
+    if (!client || !signedIn || !cloudReady) return
     const t = window.setTimeout(async () => {
-      const { data } = await supabase.auth.getUser()
+      const { data } = await client.auth.getUser()
       if (!data.user) return
-      const { error } = await supabase.from('daymark_state').upsert({ user_id: data.user.id, state: { items }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      const { error } = await client.from('daymark_state').upsert({ user_id: data.user.id, state: { items }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
       if (error) notify('Saved on this device; cloud sync failed. Please check your connection.')
     }, 650)
     return () => window.clearTimeout(t)
