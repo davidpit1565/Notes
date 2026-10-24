@@ -49,10 +49,10 @@ Checked 25 October 2026. Apple requirements change; re-check all linked sources 
 - [x] PWA manifest, icon, offline app-shell service worker.
 - [x] Initial GitHub Pages workflow added.
 - [x] Release checklist and architecture risks documented.
-- [ ] Verify actual GitHub Actions build and Pages deployment.
+- [x] Verify web typecheck/production build and GitHub Pages deployment on the merged commit.\n- [x] Add a native SwiftUI Xcode project and automated iOS Simulator build workflow (automated build passes; physical-device behavior remains unverified).
 - [ ] Verify Supabase account sync on two physical devices; resolve simultaneous edit conflicts.
 - [ ] Add real privacy policy and support contact before public release.
 - [ ] Add account deletion flow before any native release that supports account creation.
-- [ ] Create native Xcode project, icon asset catalog, signing, privacy declarations and TestFlight validation.
+- [x] Add a draft native app icon asset generation step and Xcode asset catalog.\n- [ ] Finalize app icon/brand and verify rendered icon in Xcode and on device.\n- [ ] Complete native shared cloud sync/auth, privacy/support URLs, signing, privacy declarations and TestFlight validation.
 
-**Honest status:** the current deliverable is a web app/PWA implementation, not an Xcode app and not App Store-ready. Native readiness remains a separate engineering and verification phase.
+**Honest status:** the repository now contains both a web/PWA and a starter native SwiftUI iOS app. The web build/deployment and automated iOS Simulator build pass, but the product is not App Store-ready: native cross-device sync/auth, physical-device testing, final branding/name availability, privacy/support URLs, release signing and TestFlight remain outstanding. Apple approval cannot be guaranteed by an automated checklist.
