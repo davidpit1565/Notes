@@ -14,10 +14,12 @@ const isTime = (value: unknown): value is string => typeof value === 'string' &&
 const isPlannerItem = (item: unknown): item is PlannerItem => {
   if (!item || typeof item !== 'object') return false
   const x = item as Partial<PlannerItem>
-  return typeof x.id === 'string' && isDateKey(x.date) && typeof x.title === 'string' &&
-    typeof x.details === 'string' && typeof x.done === 'boolean' &&
+  return typeof x.id === 'string' && x.id.length > 0 && x.id.length <= 128 &&
+    isDateKey(x.date) && typeof x.title === 'string' && x.title.trim().length > 0 && x.title.length <= 180 &&
+    typeof x.details === 'string' && x.details.length <= 3000 && typeof x.done === 'boolean' &&
     ['task', 'event', 'note'].includes(String(x.kind)) && isTime(x.start) && isTime(x.end) &&
-    typeof x.category === 'string' && typeof x.createdAt === 'number' && Number.isFinite(x.createdAt)
+    typeof x.category === 'string' && x.category.length <= 60 &&
+    typeof x.createdAt === 'number' && Number.isFinite(x.createdAt) && x.createdAt >= 0
 }
 
 const preserveRecoveryCopy = (raw: string) => {
@@ -180,6 +182,10 @@ export default function App() {
     const file = event.currentTarget.files?.[0]
     event.currentTarget.value = ''
     if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setToast('This backup is too large. Choose a file smaller than 5 MB.')
+      return
+    }
     try {
       const parsed: unknown = JSON.parse(await file.text())
       if (!parsed || typeof parsed !== 'object' || !('schemaVersion' in parsed) ||
