@@ -17,7 +17,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 18) {
                     dateHeader
                     daySummary
                     if dayItems.isEmpty {
@@ -76,19 +76,6 @@ struct ContentView: View {
                         .accessibilityLabel("Add planner item")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                Button { editingItem = nil; showingComposer = true } label: {
-                    Label("Plan something", systemImage: "plus")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0.20, green: 0.32, blue: 0.24))
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                .background(.bar)
-            }
             .sheet(isPresented: $showingComposer, onDismiss: { editingItem = nil }) {
                 Group {
                     if let item = editingItem {
@@ -121,8 +108,8 @@ struct ContentView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
                     Text(selectedDate, format: .dateTime.month(.wide).day())
-                        .font(.system(size: 30, weight: .semibold, design: .rounded))
-                        .tracking(-0.7)
+                        .font(.system(size: 30, weight: .semibold))
+                        .tracking(-0.6)
                 }
                 Spacer()
                 DatePicker("Choose date", selection: $selectedDate, displayedComponents: .date)
@@ -146,7 +133,7 @@ struct ContentView: View {
                         .padding(.vertical, 12)
                         .background {
                             if Calendar.current.isDate(date, inSameDayAs: selectedDate) {
-                                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(red: 0.20, green: 0.32, blue: 0.24))
+                                RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.accentColor)
                             }
                         }
                     }
@@ -154,31 +141,29 @@ struct ContentView: View {
                     .accessibilityLabel(date.formatted(date: .complete, time: .omitted))
                 }
             }
-            .padding(7)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .padding(.top, 2)
         }
     }
 
     private var daySummary: some View {
         let tasks = dayItems.filter { $0.kind == .task }
         let completed = tasks.filter(\.isDone).count
-        return HStack(spacing: 12) {
-            Image(systemName: "sun.max.fill")
-                .font(.title2)
-                .foregroundStyle(Color(red: 0.56, green: 0.61, blue: 0.42))
-                .frame(width: 48, height: 48)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            VStack(alignment: .leading, spacing: 3) {
-                Text(Calendar.current.isDateInToday(selectedDate) ? "Your day, at your pace" : "A little room to think")
-                    .font(.headline)
-                Text(tasks.isEmpty ? "No tasks planned yet" : "\(completed) of \(tasks.count) tasks completed")
+        return HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(Calendar.current.isDateInToday(selectedDate) ? "Your day" : "Daily overview")
+                    .font(.headline.weight(.semibold))
+                Text(tasks.isEmpty ? "No tasks planned" : "\(completed) of \(tasks.count) completed")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
+            if !tasks.isEmpty {
+                Text("\(Int((Double(completed) / Double(tasks.count) * 100).rounded()))%")
+                    .font(.subheadline.weight(.medium).monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
         }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .padding(.vertical, 4)
     }
 }
 
@@ -236,9 +221,14 @@ private struct PlannerRow: View {
                 Text("This action cannot be undone.")
             }
         }
-        .padding(16)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 2)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color(uiColor: .separator).opacity(0.25))
+                .frame(height: 1)
+        }
     }
 }
 
