@@ -48,6 +48,7 @@ struct ContentView: View {
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("Dailume")
             .navigationBarTitleDisplayMode(.large)
+            .tint(Color(red: 0.20, green: 0.32, blue: 0.24))
             .searchable(text: $searchText, prompt: "Search your day")
             .alert("Event reminders", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
                 Button("OK") { reminderMessage = "" }
