@@ -183,3 +183,34 @@ test('rejects duplicate item IDs in imported backups', async ({ page }) => {
   })
   await expect(page.getByText('This backup file is not valid for Dailume.')).toBeVisible()
 })
+
+
+test('rejects imported items with oversized fields without replacing current data', async ({ page }) => {
+  const today = await page.evaluate(() => {
+    const date = new Date()
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  })
+  const existing = {
+    id: 'keep-this', date: today, title: 'Existing safe item', details: '', kind: 'task',
+    start: '09:00', end: '09:30', done: false, category: 'Personal', createdAt: Date.now(),
+  }
+  await page.evaluate(item => localStorage.setItem('daymark:v1', JSON.stringify({ items: [item] })), existing)
+  await page.reload()
+  const backup = {
+    schemaVersion: 1,
+    items: [{ ...existing, id: 'oversized', title: 'x'.repeat(181) }],
+  }
+  await page.locator('input[aria-label="Import backup"]').setInputFiles({
+    name: 'oversized-field.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)),
+  })
+  await expect(page.getByRole('status')).toContainText('This backup file is not valid for Dailume.')
+  await expect(page.getByText('Existing safe item', { exact: true })).toBeVisible()
+  await expect(page.getByText('x'.repeat(181), { exact: true })).toHaveCount(0)
+})
+
+test('rejects an oversized backup file before parsing it', async ({ page }) => {
+  await page.locator('input[aria-label="Import backup"]').setInputFiles({
+    name: 'too-large.json', mimeType: 'application/json', buffer: Buffer.alloc(5 * 1024 * 1024 + 1, 32),
+  })
+  await expect(page.getByRole('status')).toContainText('This backup is too large.')
+})
