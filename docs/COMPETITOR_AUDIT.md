@@ -45,3 +45,14 @@ These are third-party community tools, not Apple-endorsed products. Their advice
 6. Respect 44pt/touch-sized targets, keyboard focus, reduced motion, contrast and Dynamic Type.
 7. Local-only storage must be described honestly. No account or cross-device sync is claimed until a real backend, authentication, recovery, privacy and security model exists.
 8. Calendar/Reminders integration should be permission-led, reversible, and tested for duplicate events, edits, deletions, denied permissions, time zones and daylight-saving transitions.
+
+## Community review signals (anecdotal, not representative)
+
+Recent user discussions reinforce the core trade-off between restraint and breadth:
+
+- A June 2025 r/ProductivityApps post praises Todoist's clean quick capture but says TickTick can feel cluttered as tags and controls accumulate: https://www.reddit.com/r/ProductivityApps/comments/1l7yhum/tried_5_popular_productivity_apps_heres_my_honest_take/
+- A Things 3 discussion from April 2025 praises its simple, polished UI and Apple/iPad workflow, while noting that users wanting time-blocking/calendar workflows may need TickTick or Fantastical: https://www.reddit.com/r/thingsapp/comments/1jw7aqz/should_i_move_from_things3_to_ticktick_or_todoist/
+- A November 2025 Todoist migration discussion includes complaints about reliability/sync and frustration with AI features that users felt did not solve core planning needs: https://www.reddit.com/r/todoist/comments/1onrx0o/migrating_off_of_todoist/
+- A January 2026 discussion shows some users moving to Apple Reminders for value, while others find its quick-entry/keyboard workflow clumsy: https://www.reddit.com/r/todoist/comments/1qgqqc8/how_many_of_you_quit_todoist_after_the_price_hike/
+
+Interpretation: these are self-selected posts, not a statistical sample or verified bug counts. The recurring product lesson is to prioritize fast capture, trustworthy persistence/sync, and a quiet interface before adding AI, analytics, or complexity. Dailume currently has local-only persistence, so reliability and data portability matter more than marketing claims about sync.
