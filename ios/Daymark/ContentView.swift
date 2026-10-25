@@ -32,7 +32,7 @@ struct ContentView: View {
                                     onEdit: { editingItem = item; showingComposer = true },
                                     onDelete: {
                                         store.delete(item)
-                                        Task { await ReminderManager.cancel(item) }
+                                        Task { await ReminderManager.refreshSchedule(store.items) }
                                     }
                                 )
                             }
@@ -81,16 +81,12 @@ struct ContentView: View {
                     if let item = editingItem {
                         ItemComposer(selectedDate: selectedDate, item: item) { updated in
                             store.update(updated)
-                            if updated.kind == .event {
-                                Task { await ReminderManager.schedule(updated) }
-                            } else {
-                                Task { await ReminderManager.cancel(updated) }
-                            }
+                            Task { await ReminderManager.refreshSchedule(store.items) }
                         }
                     } else {
                         ItemComposer(selectedDate: selectedDate) { created in
-                            let item = store.add(title: created.title, details: created.details, kind: created.kind, date: created.date, start: created.start, end: created.end)
-                            if item.kind == .event { Task { await ReminderManager.schedule(item) } }
+                            store.add(title: created.title, details: created.details, kind: created.kind, date: created.date, start: created.start, end: created.end)
+                            Task { await ReminderManager.refreshSchedule(store.items) }
                         }
                     }
                 }
