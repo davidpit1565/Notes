@@ -3,8 +3,12 @@ import { Check, ChevronRight, Circle, Clock3, FileText, Plus, X, Search, Calenda
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem } from './lib/types'
 
 type Tab = 'Today' | 'Upcoming' | 'Notes'
-const isDateKey = (value: unknown): value is string =>
-  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(value + 'T12:00:00').getTime())
+const isDateKey = (value: unknown): value is string => {
+  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const parsed = new Date(year, month - 1, day, 12)
+  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+}
 const isTime = (value: unknown): value is string => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
 
 const isPlannerItem = (item: unknown): item is PlannerItem => {
@@ -29,7 +33,12 @@ const readItems = (): PlannerItem[] => {
       preserveRecoveryCopy(raw)
       return []
     }
-    const valid = value.items.filter(isPlannerItem)
+    const seen = new Set<string>()
+    const valid = value.items.filter((item): item is PlannerItem => {
+      if (!isPlannerItem(item) || seen.has(item.id)) return false
+      seen.add(item.id)
+      return true
+    })
     if (valid.length !== value.items.length) preserveRecoveryCopy(raw)
     return valid
   } catch {
@@ -132,6 +141,10 @@ export default function App() {
   const saveDraft = () => {
     const title = draft.title.trim()
     if (!title) return
+    if (!isDateKey(draft.date)) {
+      setToast('Choose a valid date.')
+      return
+    }
     if (draft.kind === 'event' && draft.end <= draft.start) {
       setToast('Choose an end time later than the start time.')
       return
@@ -171,7 +184,7 @@ export default function App() {
       const parsed: unknown = JSON.parse(await file.text())
       if (!parsed || typeof parsed !== 'object' || !('schemaVersion' in parsed) ||
           parsed.schemaVersion !== 1 || !('items' in parsed) || !Array.isArray(parsed.items) ||
-          !parsed.items.every(isPlannerItem)) {
+          !parsed.items.every(isPlannerItem) || new Set(parsed.items.map(item => (item as PlannerItem).id)).size !== parsed.items.length) {
         setToast('This backup file is not valid for Dailume.')
         return
       }
