@@ -27,6 +27,17 @@ jobs:
         run: npm install
       - name: Typecheck and build
         run: npm run build
+      - name: Verify production output
+        run: |
+          test -s dist/index.html
+          test -s dist/sitemap.xml
+          grep -q '/Notes/assets/' dist/index.html
+          if grep -q 'src/main.tsx' dist/index.html; then
+            echo "Production index still points to source TSX instead of built assets."
+            exit 1
+          fi
+          test -s dist/privacy.html
+          test -s dist/support.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload build
