@@ -151,3 +151,15 @@ body{background:var(--page);color:var(--ink)}
   .floating-add{bottom:84px;min-height:48px}
   .tab-bar{bottom:0}
 }
+
+
+/* Keep focus and dark-mode states aligned with the restrained green design system. */
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline-color:var(--accent)}
+:root[data-theme='dark'] .theme-toggle{background:transparent;color:var(--muted)}
+:root[data-theme='dark'] .kind-picker button{color:var(--ink)}
+:root[data-theme='dark'] .kind-picker button.active{background:#343830;color:#b8d1bd}
+:root[data-theme='dark'] .search-field input{color:var(--ink)}
+:root[data-theme='dark'] .input-label{color:#e2e5dc}
+:root[data-theme='dark'] .input-label>span,:root[data-theme='dark'] .composer-header p{color:#a9c4ae}
+:root[data-theme='dark'] .sheet-handle{background:#454a41}
+:root[data-theme='dark'] .task-row:hover{background:#20231f}
