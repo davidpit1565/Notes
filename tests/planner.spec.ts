@@ -94,13 +94,20 @@ test('exports a backup file', async ({ page }) => {
 })
 
 test('restores a valid backup after confirmation', async ({ page }) => {
+  const today = await page.evaluate(() => {
+    const date = new Date()
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return \`${y}-\${m}-\${d}\`
+  })
   const backup = {
     app: 'Dailume',
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
     items: [{
       id: 'backup-item-1',
-      date: '2026-10-26',
+      date: today,
       title: 'Restored from backup',
       details: 'Verified local restore',
       kind: 'task',
