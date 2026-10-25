@@ -27,6 +27,7 @@ enum ReminderManager {
     }
 
     static func schedule(_ item: PlannerItem) async {
+        await cancel(item)
         guard item.kind == .event else { return }
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
