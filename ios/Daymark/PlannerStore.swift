@@ -40,7 +40,12 @@ final class PlannerStore {
             .sorted {
                 if $0.kind == .note && $1.kind != .note { return false }
                 if $1.kind == .note && $0.kind != .note { return true }
-                return $0.start < $1.start
+                let firstMinutes = Calendar.current.component(.hour, from: $0.start) * 60 +
+                    Calendar.current.component(.minute, from: $0.start)
+                let secondMinutes = Calendar.current.component(.hour, from: $1.start) * 60 +
+                    Calendar.current.component(.minute, from: $1.start)
+                if firstMinutes != secondMinutes { return firstMinutes < secondMinutes }
+                return $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
             }
     }
 
@@ -72,8 +77,12 @@ final class PlannerStore {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let decoded = try? JSONDecoder().decode([PlannerItem].self, from: data) else { return }
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        guard let decoded = try? JSONDecoder().decode([PlannerItem].self, from: data) else {
+            // Preserve unreadable saved data before a later save can overwrite it.
+            UserDefaults.standard.set(data, forKey: storageKey + ".recovery")
+            return
+        }
         items = decoded
     }
 
