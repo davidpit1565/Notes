@@ -133,3 +133,13 @@ test('keeps a recovery copy if saved JSON is corrupted', async ({ page }) => {
   const recovery = await page.evaluate(() => localStorage.getItem('daymark:v1:recovery'))
   expect(recovery).toBe('{invalid json')
 })
+
+test('switches between light and dark mode and remembers the choice', async ({ page }) => {
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await page.getByRole('button', { name: 'Switch to dark mode' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await page.getByRole('button', { name: 'Switch to light mode' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+})
