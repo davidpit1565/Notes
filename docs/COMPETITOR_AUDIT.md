@@ -84,14 +84,24 @@ These are individual public discussions and should be treated as qualitative sig
 ### Still open — product or release blockers
 
 - [ ] **No cross-device sync/account.** Website items are stored in browser localStorage; native iOS items are stored separately in UserDefaults. They do not sync to each other or across devices. This is an explicit limitation, not a working feature.
-- [ ] **No Apple Calendar / Reminders data integration.** Native local notifications are not the same as EventKit calendar/reminder records. The app cannot currently read/write the user's Calendar or Reminders.
+- [x] **One-way Apple Calendar / Reminders export added to native iOS.** Users can explicitly add a copy of an event to Calendar or a task to Reminders. It uses iOS 17 EventKit permission APIs and purpose strings.
+- [ ] **No two-way Calendar / Reminders sync.** Exported copies are not linked back to Dailume; edits/deletions do not propagate, and repeated exports can create duplicates. This is intentionally disclosed in the UI. Full sync requires identifiers, conflict/deletion handling, and broader permission decisions.
 - [ ] **Native data export/import is missing.** Web backup does not back up the native UserDefaults store.
 - [ ] **Native persistence has no visible save-failure state.** UserDefaults writes are usually straightforward, but current save code cannot tell the user if encoding fails.
 - [ ] **Notification delivery is not yet covered by device-level tests.** CI compilation does not prove real permission prompts, Focus modes, scheduled delivery, reboot behavior, or time-zone/DST transitions.
 - [ ] **No recurring tasks, priority, tags/projects, or advanced filters.** These are not automatically bugs; add only after validating that the target audience needs them.
+- [x] **Keyboard accessibility improved.** The web composer now traps focus, closes on Escape, and restores focus to the invoking control; regression test added.
 - [ ] **No measured usability study or same-device competitor benchmark yet.** The current competitor comparison is research-based, not a claim of hands-on parity testing.
 - [ ] **No App Store review / accessibility sign-off yet.** CI does not replace VoiceOver, large text, contrast, localization, offline, and real-device testing.
 
 ## Prioritization rule
 
 Fix data loss, date/time correctness, reminder trust, accessibility, and broken deployment before feature breadth. Choose integrations based on a clearly defined source of truth and explicit user consent. Do not build login until account recovery, encryption in transit, backend authorization, deletion/export, privacy disclosures, and a real sync conflict strategy are designed.
+
+
+## Verification after latest implementation pass
+
+- Prior published build (commit `d317a591`): live smoke suite passed 3/3, including app load, privacy/support pages, and create-and-reload persistence.
+- Native iOS simulator build, web typecheck/production build, and 18 Playwright E2E tests passed for commit `567284bd` before the latest focus-trap and CSS refinement.
+- Latest changes add the keyboard-focus regression test, strict backup-size/field validation, EventKit one-way export, notification rescheduling, native date sorting/recovery, and dark-mode focus contrast. Their newest CI run must pass before these are considered verified.
+- No actual device permission-prompt or notification-delivery test has been performed here. Simulator compilation alone does not prove those behaviors.
