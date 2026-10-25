@@ -4,8 +4,8 @@ test('published planner loads with rendered app content', async ({ page }) => {
   const response = await page.goto('/Notes/', { waitUntil: 'networkidle' })
   expect(response?.status()).toBe(200)
   await expect(page).toHaveTitle(/Dailume/)
-  await expect(page.getByText('dailume', { exact: true })).toBeVisible({ timeout: 20_000 })
-  await expect(page.getByRole('heading', { name: /Today/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Today/ })).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByRole('alert')).toHaveCount(0)
   await expect(page.getByText('The planner did not load.')).toHaveCount(0)
 })
 
