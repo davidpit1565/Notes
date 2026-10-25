@@ -236,6 +236,7 @@ private struct PlannerRow: View {
 private struct ItemComposer: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft: PlannerItem
+    private let isEditing: Bool
     let onSave: (PlannerItem) -> Void
 
     init(selectedDate: Date, item: PlannerItem? = nil, onSave: @escaping (PlannerItem) -> Void) {
@@ -243,6 +244,7 @@ private struct ItemComposer: View {
         let defaultStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: day) ?? day
         let defaultEnd = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: day) ?? day
         _draft = State(initialValue: item ?? PlannerItem(date: day, title: "", start: defaultStart, end: defaultEnd))
+        self.isEditing = item != nil
         self.onSave = onSave
     }
 
@@ -281,7 +283,7 @@ private struct ItemComposer: View {
                     }
                 }
             }
-            .navigationTitle(draft.id == UUID() ? "New plan" : "Edit plan")
+            .navigationTitle(isEditing ? "Edit plan" : "New plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
