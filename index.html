@@ -9,19 +9,32 @@
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <title>Dailume — make room for your day</title>
     <script>
-      // Clear old app-shell caches and unregister any previous service worker.
-      // A stale cached shell must never leave the planner looking like a blank page.
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          registrations.filter(registration => new URL(registration.scope).pathname.includes('/Notes/'))
-            .forEach(registration => registration.unregister());
-        }).catch(() => {});
-      }
-      if ('caches' in window) {
-        caches.keys().then(keys => Promise.all(keys
-          .filter(key => key.startsWith('dailume-shell-') || key.startsWith('daymark-shell-'))
-          .map(key => caches.delete(key)))).catch(() => {});
-      }
+      // Retire the old cache-first worker before booting the new app shell.
+      // Reload once after unregistering so the next navigation is not controlled by it.
+      (async () => {
+        try {
+          const wasControlled = 'serviceWorker' in navigator && Boolean(navigator.serviceWorker.controller);
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations
+              .filter(registration => new URL(registration.scope).pathname.includes('/Notes/'))
+              .map(registration => registration.unregister()));
+          }
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys
+              .filter(key => key.startsWith('dailume-shell-') || key.startsWith('daymark-shell-'))
+              .map(key => caches.delete(key)));
+          }
+          if (wasControlled && !sessionStorage.getItem('dailume-worker-retired-v1')) {
+            sessionStorage.setItem('dailume-worker-retired-v1', '1');
+            window.location.reload();
+            return;
+          }
+        } catch {
+          // Continue to the visible startup fallback if browser storage APIs are unavailable.
+        }
+      })();
       window.setTimeout(() => {
         const root = document.getElementById('root');
         if (root && root.dataset.appReady !== 'true') {
