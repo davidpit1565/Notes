@@ -71,6 +71,7 @@ export default function App() {
     try { return localStorage.getItem('dailume:theme') === 'dark' ? 'dark' : 'light' } catch { return 'light' }
   })
   const importInputRef = useRef<HTMLInputElement>(null)
+  const composerReturnFocusRef = useRef<HTMLElement | null>(null)
 
   const today = todayKey()
 
@@ -99,7 +100,6 @@ export default function App() {
   useEffect(() => {
     if (!composerOpen) return
     const previousOverflow = document.body.style.overflow
-    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]')
     const getFocusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>(
       'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -133,7 +133,9 @@ export default function App() {
     return () => {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', onKeyDown)
-      if (previouslyFocused?.isConnected) previouslyFocused.focus()
+      const returnFocus = composerReturnFocusRef.current
+      composerReturnFocusRef.current = null
+      if (returnFocus?.isConnected) returnFocus.focus()
     }
   }, [composerOpen])
 
@@ -154,6 +156,7 @@ export default function App() {
   }, [items, tab, selectedDay, today, searchText])
 
   const openNew = () => {
+    composerReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const date = tab === 'Upcoming' ? todayKey(new Date(Date.now() + 86400000)) : selectedDay
     const kind = tab === 'Notes' ? 'note' : 'task'
     setEditing(null)
@@ -162,6 +165,7 @@ export default function App() {
   }
 
   const openEdit = (item: PlannerItem) => {
+    composerReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     setEditing(item)
     setDraft({ ...item })
     setComposerOpen(true)
