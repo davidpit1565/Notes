@@ -56,3 +56,42 @@ Recent user discussions reinforce the core trade-off between restraint and bread
 - A January 2026 discussion shows some users moving to Apple Reminders for value, while others find its quick-entry/keyboard workflow clumsy: https://www.reddit.com/r/todoist/comments/1qgqqc8/how_many_of_you_quit_todoist_after_the_price_hike/
 
 Interpretation: these are self-selected posts, not a statistical sample or verified bug counts. The recurring product lesson is to prioritize fast capture, trustworthy persistence/sync, and a quiet interface before adding AI, analytics, or complexity. Dailume currently has local-only persistence, so reliability and data portability matter more than marketing claims about sync.
+
+
+## Additional Reddit review signals checked on 25 October 2026
+
+These are individual public discussions and should be treated as qualitative signals, not a representative review sample:
+
+- TickTick calendar integration: a September 2026 thread reports confusion between calendar subscription and two-way integration; commenters describe date shifts and recurring-event issues, while another user says it works well for them. This is conflicting anecdotal evidence, not proof of a universal defect: https://www.reddit.com/r/ticktick/comments/1wdle21/google_calendar_ticktick_sync_confusion/
+- Apple Reminders reliability: an October 2026 thread describes cross-device completion state drifting and slow/blank startup; the author attributed the cause to old devices still linked to their Apple Account. This illustrates how sync problems can undermine trust even when the app is built into the OS: https://www.reddit.com/r/AppleReminders/comments/1xa4tlf/apple_reminders_i_solved_severe_sync_start/
+- Apple Reminders workflow gaps: a September 2026 thread says overdue/tomorrow filtering and rescheduling unfinished tasks required extra steps, and that unfinished items do not automatically roll forward as the user expected: https://www.reddit.com/r/AppleReminders/comments/1wfadng/trying_to_reembrace_reminders/
+- Things 3 calendar gap: a March 2025 discussion asks for a proper calendar/time visualization and describes workarounds for keeping tasks and calendar events together. Other commenters prefer keeping appointments and tasks separate, demonstrating that a combined view is not universally preferable: https://www.reddit.com/r/thingsapp/comments/1ji7f6o/how_are_you_using_a_calendar_with_things3/
+- Todoist pricing/AI sentiment: a November 2025 thread contains users objecting to price increases and AI features they did not value, while other commenters defend the price. This is a product-positioning signal, not a consensus measure: https://www.reddit.com/r/todoist/comments/1otkeah/those_of_you_most_vocal_to_the_negative_about_the_price_hike/
+- Productivity app trust and reliability: a December 2025 thread compares Things, Todoist and TickTick and mentions concerns about update regressions, reminder visibility and limitations: https://www.reddit.com/r/ProductivityApps/comments/1pp4xg4/task_reminder_apps_opinion/
+
+## Dailume audit — confirmed gaps vs intentional omissions
+
+### Fixed in the latest code pass (verification still required for newest commit)
+
+- [x] Imported backup file had no size limit; a large JSON file could consume excessive memory before parsing. Added a 5 MB guard.
+- [x] Imported planner items accepted unbounded title/details/category and ID strings. Added length and non-empty validation before restore.
+- [x] Moving a native event to another date could leave its stored start Date on the old day; sorting by the full timestamp could then order items incorrectly. Native day sorting now compares hour/minute and uses title as a stable tie-breaker.
+- [x] Unreadable native UserDefaults data previously failed decoding silently and could be overwritten by the next save. The original bytes are now copied to a recovery key before returning an empty state.
+- [x] Native date heading used a fixed point size; changed it to a semantic Dynamic Type font.
+- [x] Event notification refresh previously attempted to schedule every event without prioritizing the next upcoming events. The scheduler now removes its own stale pending requests, orders future events by trigger date, and schedules a bounded next-60 set.
+- [x] Duplicate primary add actions and several decorative native UI surfaces were removed in the prior pass.
+
+### Still open — product or release blockers
+
+- [ ] **No cross-device sync/account.** Website items are stored in browser localStorage; native iOS items are stored separately in UserDefaults. They do not sync to each other or across devices. This is an explicit limitation, not a working feature.
+- [ ] **No Apple Calendar / Reminders data integration.** Native local notifications are not the same as EventKit calendar/reminder records. The app cannot currently read/write the user's Calendar or Reminders.
+- [ ] **Native data export/import is missing.** Web backup does not back up the native UserDefaults store.
+- [ ] **Native persistence has no visible save-failure state.** UserDefaults writes are usually straightforward, but current save code cannot tell the user if encoding fails.
+- [ ] **Notification delivery is not yet covered by device-level tests.** CI compilation does not prove real permission prompts, Focus modes, scheduled delivery, reboot behavior, or time-zone/DST transitions.
+- [ ] **No recurring tasks, priority, tags/projects, or advanced filters.** These are not automatically bugs; add only after validating that the target audience needs them.
+- [ ] **No measured usability study or same-device competitor benchmark yet.** The current competitor comparison is research-based, not a claim of hands-on parity testing.
+- [ ] **No App Store review / accessibility sign-off yet.** CI does not replace VoiceOver, large text, contrast, localization, offline, and real-device testing.
+
+## Prioritization rule
+
+Fix data loss, date/time correctness, reminder trust, accessibility, and broken deployment before feature breadth. Choose integrations based on a clearly defined source of truth and explicit user consent. Do not build login until account recovery, encryption in transit, backend authorization, deletion/export, privacy disclosures, and a real sync conflict strategy are designed.
