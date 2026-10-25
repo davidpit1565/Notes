@@ -214,3 +214,17 @@ test('rejects an oversized backup file before parsing it', async ({ page }) => {
   })
   await expect(page.getByRole('status')).toContainText('This backup is too large.')
 })
+
+
+test('keeps keyboard focus inside the composer and restores it on close', async ({ page }) => {
+  await page.getByRole('button', { name: 'New item' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  const controls = dialog.locator('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])')
+  await controls.last().focus()
+  await page.keyboard.press('Tab')
+  await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'New item' })).toBeFocused()
+})
