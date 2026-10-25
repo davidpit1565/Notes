@@ -9,6 +9,23 @@ test('published planner loads with rendered app content', async ({ page }) => {
   await expect(page.getByText('The planner did not load.')).toHaveCount(0)
 })
 
+test('published planner exposes canonical SEO metadata and a public sitemap', async ({ page, request }) => {
+  const response = await page.goto('/Notes/', { waitUntil: 'domcontentloaded' })
+  expect(response?.status()).toBe(200)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(page).toHaveTitle('Dailume — make room for your day')
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /calm, simple planner/)
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://davidpit1565.github.io/Notes/')
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Dailume — make room for your day')
+
+  const sitemap = await request.get('/Notes/sitemap.xml')
+  expect(sitemap.status()).toBe(200)
+  const xml = await sitemap.text()
+  expect(xml).toContain('https://davidpit1565.github.io/Notes/')
+  expect(xml).toContain('https://davidpit1565.github.io/Notes/privacy.html')
+  expect(xml).toContain('https://davidpit1565.github.io/Notes/support.html')
+})
+
 test('published privacy and support pages are reachable', async ({ page }) => {
   const privacy = await page.goto('/Notes/privacy.html', { waitUntil: 'domcontentloaded' })
   expect(privacy?.status()).toBe(200)
