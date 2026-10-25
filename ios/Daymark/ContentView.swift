@@ -30,6 +30,12 @@ struct ContentView: View {
                                     item: item,
                                     onToggle: { store.toggle(item) },
                                     onEdit: { editingItem = item; showingComposer = true },
+                                    onExportToCalendar: {
+                                        Task { reminderMessage = await AppleIntegrationManager.addCopyToCalendar(item) }
+                                    },
+                                    onExportToReminders: {
+                                        Task { reminderMessage = await AppleIntegrationManager.addCopyToReminders(item) }
+                                    },
                                     onDelete: {
                                         store.delete(item)
                                         Task { await ReminderManager.refreshSchedule(store.items) }
@@ -50,7 +56,7 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.large)
             .tint(Color(red: 0.20, green: 0.32, blue: 0.24))
             .searchable(text: $searchText, prompt: "Search your day")
-            .alert("Event reminders", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
+            .alert("Dailume", isPresented: Binding(get: { !reminderMessage.isEmpty }, set: { if !$0 { reminderMessage = "" } })) {
                 Button("OK") { reminderMessage = "" }
             } message: { Text(reminderMessage) }
             .toolbar {
@@ -167,6 +173,8 @@ private struct PlannerRow: View {
     let item: PlannerItem
     let onToggle: () -> Void
     let onEdit: () -> Void
+    let onExportToCalendar: () -> Void
+    let onExportToReminders: () -> Void
     let onDelete: () -> Void
     @State private var showingDeleteConfirmation = false
 
@@ -206,6 +214,11 @@ private struct PlannerRow: View {
             Spacer(minLength: 4)
             Menu {
                 Button(action: onEdit) { Label("Edit", systemImage: "pencil") }
+                if item.kind == .event {
+                    Button(action: onExportToCalendar) { Label("Add copy to Apple Calendar", systemImage: "calendar.badge.plus") }
+                } else if item.kind == .task {
+                    Button(action: onExportToReminders) { Label("Add copy to Apple Reminders", systemImage: "checklist") }
+                }
                 Button(role: .destructive) { showingDeleteConfirmation = true } label: { Label("Delete", systemImage: "trash") }
             } label: {
                 Image(systemName: "ellipsis").foregroundStyle(.tertiary).frame(width: 44, height: 44).contentShape(Rectangle())
