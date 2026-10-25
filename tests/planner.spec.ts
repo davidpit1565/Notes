@@ -85,3 +85,44 @@ test('fits a narrow 320px viewport without horizontal overflow', async ({ page }
   }))
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
 })
+
+test('exports a backup file', async ({ page }) => {
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Export backup' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/^dailume-backup-\d{4}-\d{2}-\d{2}\.json$/)
+})
+
+test('restores a valid backup after confirmation', async ({ page }) => {
+  const backup = {
+    app: 'Dailume',
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    items: [{
+      id: 'backup-item-1',
+      date: '2026-10-26',
+      title: 'Restored from backup',
+      details: 'Verified local restore',
+      kind: 'task',
+      start: '09:00',
+      end: '09:30',
+      done: false,
+      category: 'Personal',
+      createdAt: 1793000000000,
+    }],
+  }
+  page.once('dialog', dialog => dialog.accept())
+  await page.locator('input[aria-label="Import backup"]').setInputFiles({
+    name: 'dailume-backup.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  })
+  await expect(page.getByText('Restored from backup', { exact: true })).toBeVisible()
+})
+
+test('keeps a recovery copy if saved JSON is corrupted', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('daymark:v1', '{invalid json'))
+  await page.reload()
+  const recovery = await page.evaluate(() => localStorage.getItem('daymark:v1:recovery'))
+  expect(recovery).toBe('{invalid json')
+})
