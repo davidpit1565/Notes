@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronRight, Circle, Clock3, FileText, Plus, X, Search, CalendarDays } from 'lucide-react'
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem } from './lib/types'
 
@@ -7,21 +7,38 @@ const isDateKey = (value: unknown): value is string =>
   typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(value + 'T12:00:00').getTime())
 const isTime = (value: unknown): value is string => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
 
+const isPlannerItem = (item: unknown): item is PlannerItem => {
+  if (!item || typeof item !== 'object') return false
+  const x = item as Partial<PlannerItem>
+  return typeof x.id === 'string' && isDateKey(x.date) && typeof x.title === 'string' &&
+    typeof x.details === 'string' && typeof x.done === 'boolean' &&
+    ['task', 'event', 'note'].includes(String(x.kind)) && isTime(x.start) && isTime(x.end) &&
+    typeof x.category === 'string' && typeof x.createdAt === 'number' && Number.isFinite(x.createdAt)
+}
+
+const preserveRecoveryCopy = (raw: string) => {
+  try { localStorage.setItem(STORAGE_KEY + ':recovery', raw) } catch { /* Best effort when storage is full. */ }
+}
+
 const readItems = (): PlannerItem[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
     const value: unknown = JSON.parse(raw)
-    if (!value || typeof value !== 'object' || !('items' in value) || !Array.isArray(value.items)) return []
-    return value.items.filter((item): item is PlannerItem => {
-      if (!item || typeof item !== 'object') return false
-      const x = item as Partial<PlannerItem>
-      return typeof x.id === 'string' && isDateKey(x.date) && typeof x.title === 'string' &&
-        typeof x.details === 'string' && typeof x.done === 'boolean' &&
-        ['task', 'event', 'note'].includes(String(x.kind)) && isTime(x.start) && isTime(x.end) &&
-        typeof x.createdAt === 'number' && Number.isFinite(x.createdAt)
-    })
-  } catch { return [] }
+    if (!value || typeof value !== 'object' || !('items' in value) || !Array.isArray(value.items)) {
+      preserveRecoveryCopy(raw)
+      return []
+    }
+    const valid = value.items.filter(isPlannerItem)
+    if (valid.length !== value.items.length) preserveRecoveryCopy(raw)
+    return valid
+  } catch {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) preserveRecoveryCopy(raw)
+    } catch { /* Storage itself may be unavailable. */ }
+    return []
+  }
 }
 
 const dateText = (date: string, options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' }) => {
@@ -39,6 +56,7 @@ export default function App() {
   const [editing, setEditing] = useState<PlannerItem | null>(null)
   const [draft, setDraft] = useState<PlannerItem>(() => newItem(todayKey()))
   const [toast, setToast] = useState('')
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const today = todayKey()
   const selectedDay = dateInputValue(selectedDate)
@@ -119,6 +137,43 @@ export default function App() {
     setToast(editing ? 'Changes saved' : draft.kind === 'note' ? 'Note saved' : draft.kind === 'event' ? 'Event added' : 'Task added')
   }
 
+  const exportBackup = () => {
+    try {
+      const backup = { app: 'Dailume', schemaVersion: 1, exportedAt: new Date().toISOString(), items }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `dailume-backup-${today}.json`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setToast('Backup exported')
+    } catch {
+      setToast('Could not export a backup in this browser.')
+    }
+  }
+
+  const restoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0]
+    event.currentTarget.value = ''
+    if (!file) return
+    try {
+      const parsed: unknown = JSON.parse(await file.text())
+      if (!parsed || typeof parsed !== 'object' || !('schemaVersion' in parsed) ||
+          parsed.schemaVersion !== 1 || !('items' in parsed) || !Array.isArray(parsed.items) ||
+          !parsed.items.every(isPlannerItem)) {
+        setToast('This backup file is not valid for Dailume.')
+        return
+      }
+      if (!window.confirm('Restore this backup and replace the items currently saved in this browser? Export a backup first if you need the current items.')) return
+      if (save(parsed.items)) setToast(`Restored ${parsed.items.length} ${parsed.items.length === 1 ? 'item' : 'items'}`)
+    } catch {
+      setToast('Could not read this backup file. Your current items were not changed.')
+    }
+  }
+
   const toggle = (item: PlannerItem) => save(items.map(x => x.id === item.id ? { ...x, done: !x.done } : x))
   const deleteDraft = () => {
     if (!editing) return
@@ -195,7 +250,13 @@ export default function App() {
           <span>{name}</span>
         </button>)}
       </nav>
-      <footer className="site-footer"><a href="./privacy.html">Privacy</a><span>·</span><a href="./support.html">Support</a><span>·</span><span>Local only</span></footer>
+      <footer className="site-footer">
+        <a href="./privacy.html">Privacy</a><span>·</span><a href="./support.html">Support</a><span>·</span>
+        <button type="button" className="footer-action" onClick={exportBackup}>Export backup</button><span>·</span>
+        <button type="button" className="footer-action" onClick={() => importInputRef.current?.click()}>Restore</button>
+        <input ref={importInputRef} className="visually-hidden-file" type="file" accept="application/json,.json" aria-label="Import backup" onChange={restoreBackup} />
+        <span>Local only</span>
+      </footer>
     </main>
 
     {composerOpen && <div className="sheet-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setComposerOpen(false) }}>
