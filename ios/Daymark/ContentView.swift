@@ -226,9 +226,15 @@ private struct PlannerRow: View {
                 Button(action: onEdit) { Label("Edit", systemImage: "pencil") }
                 Button(role: .destructive) { showingDeleteConfirmation = true } label: { Label("Delete", systemImage: "trash") }
             } label: {
-                Image(systemName: "ellipsis").foregroundStyle(.tertiary).padding(8).contentShape(Rectangle())
+                Image(systemName: "ellipsis").foregroundStyle(.tertiary).frame(width: 44, height: 44).contentShape(Rectangle())
             }
             .accessibilityLabel("More actions for \(item.title)")
+            .confirmationDialog("Delete this item?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete", role: .destructive, action: onDelete)
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This action cannot be undone.")
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
