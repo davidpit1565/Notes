@@ -42,7 +42,7 @@ struct ContentView: View {
                 .frame(maxWidth: 760, alignment: .leading)
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
-                .padding(.bottom, 110)
+                .padding(.bottom, 32)
                 .frame(maxWidth: .infinity)
             }
             .background(Color(uiColor: .systemGroupedBackground))
@@ -54,23 +54,22 @@ struct ContentView: View {
                 Button("OK") { reminderMessage = "" }
             } message: { Text(reminderMessage) }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Task {
-                            let enabled = await ReminderManager.requestPermissionAndSchedule(store.items)
-                            reminderMessage = enabled ? "Event reminders are enabled on this device." : "Notifications are off. You can enable them in Settings."
-                        }
-                    } label: { Image(systemName: "bell.badge") }
-                        .accessibilityLabel("Enable event reminders")
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
+                        Button {
+                            Task {
+                                let enabled = await ReminderManager.requestPermissionAndSchedule(store.items)
+                                reminderMessage = enabled ? "Event notifications are enabled on this device." : "Notifications are off. You can enable them in Settings."
+                            }
+                        } label: {
+                            Label("Enable event notifications", systemImage: "bell.badge")
+                        }
                         Link("Privacy Policy", destination: URL(string: "https://davidpit1565.github.io/Notes/privacy.html")!)
                         Link("Support", destination: URL(string: "https://davidpit1565.github.io/Notes/support.html")!)
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
-                    .accessibilityLabel("Privacy and support")
+                    .accessibilityLabel("More options")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button { editingItem = nil; showingComposer = true } label: { Image(systemName: "plus") }
