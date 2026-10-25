@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronRight, Circle, Clock3, FileText, Plus, X, Search, CalendarDays } from 'lucide-react'
+import { Check, ChevronRight, Circle, Clock3, FileText, Plus, X, Search, CalendarDays, Moon, Sun } from 'lucide-react'
 import { newItem, STORAGE_KEY, todayKey, type PlannerItem } from './lib/types'
 
 type Tab = 'Today' | 'Upcoming' | 'Notes'
@@ -56,9 +56,17 @@ export default function App() {
   const [editing, setEditing] = useState<PlannerItem | null>(null)
   const [draft, setDraft] = useState<PlannerItem>(() => newItem(todayKey()))
   const [toast, setToast] = useState('')
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try { return localStorage.getItem('dailume:theme') === 'dark' ? 'dark' : 'light' } catch { return 'light' }
+  })
   const importInputRef = useRef<HTMLInputElement>(null)
 
   const today = todayKey()
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem('dailume:theme', theme) } catch { /* Theme still works for this session. */ }
+  }, [theme])
   const selectedDay = dateInputValue(selectedDate)
   const save = (next: PlannerItem[]) => {
     try {
@@ -194,7 +202,7 @@ export default function App() {
     <main className="planner">
       <header className="app-header">
         <div className="wordmark"><span className="wordmark-icon">d</span><span>dailume</span></div>
-        <span className="private-label"><span /> Saved on this device</span>
+        <div className="header-actions"><span className="private-label"><span /> Saved on this device</span><button className="theme-toggle" type="button" aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Dark mode' : 'Light mode'} onClick={() => setTheme(value => value === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button></div>
       </header>
 
       <section className="welcome">
