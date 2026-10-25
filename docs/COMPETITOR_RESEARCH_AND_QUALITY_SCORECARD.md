@@ -261,9 +261,10 @@ The current web app is a single-page planner, not a multi-page product with sepa
 ## SEO audit — current scope
 
 ### Current known state
-- `index.html` has `lang="en"`, viewport metadata, a meta description, a title, manifest and SVG icon.
+- `index.html` has `lang="en"`, viewport metadata, a descriptive meta description, a title, canonical URL, Open Graph basics, manifest and SVG icon (SEO metadata changes in commits after the first audit pass).
+- A sitemap was added at `public/sitemap.xml` for the planner, privacy policy and support page; a live check is still required before treating it as verified on the deployed site.
+- No `robots.txt` is added: a file under a GitHub Pages project path would be served at `/Notes/robots.txt`, not the host-level `/robots.txt` crawlers normally consult. Avoid pretending that a project-level file controls the whole host.
 - The product is a client-rendered React app and needs JavaScript to use the planner.
-- Repository lookup did not find `public/robots.txt` or `public/sitemap.xml`.
 - There are no separate indexable URLs for Today, Upcoming, Notes, Settings, or Profile because those are app states, not separate pages.
 - A planner's user data should not be made crawlable. Do not expose user-created tasks/notes in SEO content or structured data.
 - Google guidance: descriptive unique titles and meaningful headings: https://developers.google.com/search/docs/appearance/title-link
@@ -283,7 +284,7 @@ Scores are deliberately not filled in without executing the relevant test. Mark 
 | Production build / TypeScript | GitHub Actions green on current SHA | Build workflow passed on `22f1bcdc`; verify full current run |
 | Browser E2E | All Playwright tests green | Rerun pending after focus fix |
 | Live deployment smoke | Latest deployed SHA loaded and key flows passed | Previous SHA smoke passed; latest SHA smoke queued |
-| SEO metadata | Inspect deployed HTML, canonical decision, title, description, social preview | Partial: basic title/description; no sitemap/robots found in repo |
+| SEO metadata | Inspect deployed HTML, canonical decision, title, description, social preview | Code updated with canonical, OG basics and sitemap; deployed smoke test pending |
 | Performance | Lighthouse on production URL, mobile and desktop; record LCP/CLS/INP | Not tested in this pass |
 | Accessibility | Automated audit + keyboard + VoiceOver + Dynamic Type on device | Partial web keyboard test; native device testing not done |
 | Responsive | Automated 320 px and device/tablet checks | 320 px overflow test exists; broader coverage needed |
