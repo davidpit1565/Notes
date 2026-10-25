@@ -201,8 +201,8 @@ export default function App() {
   return <div className="app-shell">
     <main className="planner">
       <header className="app-header">
-        <div className="wordmark"><span className="wordmark-icon">d</span><span>dailume</span></div>
-        <div className="header-actions"><span className="private-label"><span /> Saved on this device</span><button className="theme-toggle" type="button" aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Dark mode' : 'Light mode'} onClick={() => setTheme(value => value === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button></div>
+        <div className="wordmark"><span>dailume</span></div>
+        <div className="header-actions"><button className="theme-toggle" type="button" aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Dark mode' : 'Light mode'} onClick={() => setTheme(value => value === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button></div>
       </header>
 
       <section className="welcome">
@@ -221,7 +221,6 @@ export default function App() {
           <strong>{tab === 'Today' ? (tasks ? `${completed} of ${tasks} done` : 'A fresh start') : `${tasks} ${tasks === 1 ? 'item' : 'items'} ahead`}</strong>
         </div>
         {tab === 'Today' && <div className="progress-track" role="progressbar" aria-label="Tasks completed" aria-valuemin={0} aria-valuemax={tasks || 1} aria-valuenow={completed}><span style={{ width: (tasks ? completed / tasks * 100 : 0) + '%' }} /></div>}
-        <div className="progress-mark">{tab === 'Today' ? <Check size={18} /> : <Clock3 size={18} />}</div>
       </section>}
 
       <div className="list-heading">
