@@ -99,14 +99,41 @@ export default function App() {
   useEffect(() => {
     if (!composerOpen) return
     const previousOverflow = document.body.style.overflow
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]')
+    const getFocusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ) ?? [])
     document.body.style.overflow = 'hidden'
+    const initialFocus = dialog?.querySelector<HTMLElement>('[autofocus]') ?? getFocusable()[0]
+    initialFocus?.focus()
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setComposerOpen(false)
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setComposerOpen(false)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (!focusable.length) {
+        event.preventDefault()
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && (document.activeElement === first || !dialog?.contains(document.activeElement))) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog?.contains(document.activeElement))) {
+        event.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', onKeyDown)
+      if (previouslyFocused?.isConnected) previouslyFocused.focus()
     }
   }, [composerOpen])
 
