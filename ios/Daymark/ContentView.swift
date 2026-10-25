@@ -4,6 +4,7 @@ struct ContentView: View {
     @Environment(PlannerStore.self) private var store
     @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     @State private var showingComposer = false
+    @State private var editingItem: PlannerItem?
     @State private var searchText = ""
     @State private var reminderMessage = ""
 
@@ -25,7 +26,15 @@ struct ContentView: View {
                     } else {
                         LazyVStack(spacing: 10) {
                             ForEach(dayItems) { item in
-                                PlannerRow(item: item, onToggle: { store.toggle(item) }, onDelete: { store.delete(item) })
+                                PlannerRow(
+                                    item: item,
+                                    onToggle: { store.toggle(item) },
+                                    onEdit: { editingItem = item; showingComposer = true },
+                                    onDelete: {
+                                        store.delete(item)
+                                        Task { await ReminderManager.cancel(item) }
+                                    }
+                                )
                             }
                         }
                     }
@@ -63,12 +72,12 @@ struct ContentView: View {
                     .accessibilityLabel("Privacy and support")
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button { showingComposer = true } label: { Image(systemName: "plus") }
+                    Button { editingItem = nil; showingComposer = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add planner item")
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                Button { showingComposer = true } label: {
+                Button { editingItem = nil; showingComposer = true } label: {
                     Label("Plan something", systemImage: "plus")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
@@ -80,10 +89,23 @@ struct ContentView: View {
                 .padding(.top, 10)
                 .background(.bar)
             }
-            .sheet(isPresented: $showingComposer) {
-                ItemComposer(selectedDate: selectedDate) { title, details, kind, date, start, end in
-                    let item = store.add(title: title, details: details, kind: kind, date: date, start: start, end: end)
-                    if kind == .event { Task { await ReminderManager.schedule(item) } }
+            .sheet(isPresented: $showingComposer, onDismiss: { editingItem = nil }) {
+                Group {
+                    if let item = editingItem {
+                        ItemComposer(selectedDate: selectedDate, item: item) { updated in
+                            store.update(updated)
+                            if updated.kind == .event {
+                                Task { await ReminderManager.schedule(updated) }
+                            } else {
+                                Task { await ReminderManager.cancel(updated) }
+                            }
+                        }
+                    } else {
+                        ItemComposer(selectedDate: selectedDate) { created in
+                            let item = store.add(title: created.title, details: created.details, kind: created.kind, date: created.date, start: created.start, end: created.end)
+                            if item.kind == .event { Task { await ReminderManager.schedule(item) } }
+                        }
+                    }
                 }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
@@ -163,6 +185,7 @@ struct ContentView: View {
 private struct PlannerRow: View {
     let item: PlannerItem
     let onToggle: () -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -197,6 +220,7 @@ private struct PlannerRow: View {
             }
             Spacer(minLength: 4)
             Menu {
+                Button(action: onEdit) { Label("Edit", systemImage: "pencil") }
                 Button(role: .destructive, action: onDelete) { Label("Delete", systemImage: "trash") }
             } label: {
                 Image(systemName: "ellipsis").foregroundStyle(.tertiary).padding(8).contentShape(Rectangle())
@@ -211,48 +235,66 @@ private struct PlannerRow: View {
 
 private struct ItemComposer: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
-    @State private var details = ""
-    @State private var kind: PlannerKind = .task
-    @State private var date: Date
-    @State private var start = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: .now) ?? .now
-    @State private var end = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: .now) ?? .now
+    @State private var draft: PlannerItem
+    let onSave: (PlannerItem) -> Void
 
-    let onSave: (String, String, PlannerKind, Date, Date, Date) -> Void
-
-    init(selectedDate: Date, onSave: @escaping (String, String, PlannerKind, Date, Date, Date) -> Void) {
-        _date = State(initialValue: selectedDate)
+    init(selectedDate: Date, item: PlannerItem? = nil, onSave: @escaping (PlannerItem) -> Void) {
+        let day = Calendar.current.startOfDay(for: selectedDate)
+        let defaultStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: day) ?? day
+        let defaultEnd = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: day) ?? day
+        _draft = State(initialValue: item ?? PlannerItem(date: day, title: "", start: defaultStart, end: defaultEnd))
         self.onSave = onSave
+    }
+
+    private var validTitle: Bool {
+        !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var validEventTime: Bool {
+        let start = Calendar.current.dateComponents([.hour, .minute], from: draft.start)
+        let end = Calendar.current.dateComponents([.hour, .minute], from: draft.end)
+        let startMinutes = (start.hour ?? 0) * 60 + (start.minute ?? 0)
+        let endMinutes = (end.hour ?? 0) * 60 + (end.minute ?? 0)
+        return endMinutes > startMinutes
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Type", selection: $kind) {
+                Picker("Type", selection: $draft.kind) {
                     ForEach(PlannerKind.allCases) { item in
                         Label(item.rawValue, systemImage: item.symbol).tag(item)
                     }
                 }
-                TextField("Title", text: $title)
-                TextField("Details (optional)", text: $details, axis: .vertical)
+                TextField("Title", text: $draft.title)
+                    .textInputAutocapitalization(.sentences)
+                TextField("Details (optional)", text: $draft.details, axis: .vertical)
                     .lineLimit(2...5)
-                DatePicker("Date", selection: $date, displayedComponents: .date)
-                if kind == .event {
-                    DatePicker("Starts", selection: $start, displayedComponents: .hourAndMinute)
-                    DatePicker("Ends", selection: $end, displayedComponents: .hourAndMinute)
+                DatePicker("Date", selection: $draft.date, displayedComponents: .date)
+                if draft.kind == .event {
+                    DatePicker("Starts", selection: $draft.start, displayedComponents: .hourAndMinute)
+                    DatePicker("Ends", selection: $draft.end, displayedComponents: .hourAndMinute)
+                    if !validEventTime {
+                        Text("The end time must be later than the start time.")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
                 }
             }
-            .navigationTitle("New plan")
+            .navigationTitle(draft.id == UUID() ? "New plan" : "Edit plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                        onSave(title.trimmingCharacters(in: .whitespacesAndNewlines), details.trimmingCharacters(in: .whitespacesAndNewlines), kind, date, start, end)
+                        var saved = draft
+                        saved.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                        saved.details = draft.details.trimmingCharacters(in: .whitespacesAndNewlines)
+                        saved.date = Calendar.current.startOfDay(for: draft.date)
+                        onSave(saved)
                         dismiss()
                     }
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!validTitle || (draft.kind == .event && !validEventTime))
                 }
             }
         }
