@@ -118,6 +118,8 @@
         GENERATE_INFOPLIST_FILE = YES;
         INFOPLIST_KEY_CFBundleDisplayName = Dailume;
         INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+        INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Dailume can add events you choose to your Apple Calendar.";
+        INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Dailume can create reminders you choose in Apple Reminders.";
         IPHONEOS_DEPLOYMENT_TARGET = 17.0;
         MARKETING_VERSION = 1.0;
         PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.dailume;
@@ -136,6 +138,8 @@
         GENERATE_INFOPLIST_FILE = YES;
         INFOPLIST_KEY_CFBundleDisplayName = Dailume;
         INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+        INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Dailume can add events you choose to your Apple Calendar.";
+        INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Dailume can create reminders you choose in Apple Reminders.";
         IPHONEOS_DEPLOYMENT_TARGET = 17.0;
         MARKETING_VERSION = 1.0;
         PRODUCT_BUNDLE_IDENTIFIER = com.davidpitchkhadze.dailume;
