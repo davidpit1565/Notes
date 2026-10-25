@@ -60,14 +60,6 @@ final class PlannerStore {
         save()
     }
 
-    func update(_ item: PlannerItem) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = item
-        updated.date = Calendar.current.startOfDay(for: item.date)
-        items[index] = updated
-        save()
-    }
-
     func toggle(_ item: PlannerItem) {
         guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
         items[index].isDone.toggle()
