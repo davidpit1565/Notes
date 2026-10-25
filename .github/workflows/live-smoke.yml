@@ -1,0 +1,31 @@
+name: Live Pages smoke test
+on:
+  workflow_run:
+    workflows: ["Build and deploy Daymark"]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test the published website
+        run: npx playwright test --config=playwright.live.config.ts tests/live-smoke.spec.ts
+      - name: Upload live smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dailume-live-smoke-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
