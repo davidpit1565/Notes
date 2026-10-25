@@ -105,3 +105,24 @@ Fix data loss, date/time correctness, reminder trust, accessibility, and broken 
 - Native iOS simulator build, web typecheck/production build, and 18 Playwright E2E tests passed for commit `567284bd` before the latest focus-trap and CSS refinement.
 - Latest changes add the keyboard-focus regression test, strict backup-size/field validation, EventKit one-way export, notification rescheduling, native date sorting/recovery, and dark-mode focus contrast. Their newest CI run must pass before these are considered verified.
 - No actual device permission-prompt or notification-delivery test has been performed here. Simulator compilation alone does not prove those behaviors.
+
+
+## App Store review sample (public storefront pages checked 25 October 2026)
+
+Ratings below are storefront snapshots visible on the linked Apple App Store pages. Country, platform and review count differ, so these numbers are **not a controlled head-to-head score**.
+
+| App | Storefront snapshot | Positive themes visible | Friction themes visible |
+|---|---|---|---|
+| Structured | Belgium iPhone: 4.7/5 from ~4K ratings; US: 4.8/5 from ~166K ratings | Clear daily planning, easy-to-use schedule, design appreciated | Some reviews report sync problems, lost/reappearing subtasks, lag and task movement bugs after OS updates; some report localization/grammar errors |
+| TickTick | Belgium iPhone: 4.7/5 from ~723 ratings; US: 4.9/5 from ~46K ratings | Feature breadth, tasks in calendar, Pomodoro/habit tools, generous free tier | Some reviews want direct event creation; Reddit threads report inconsistent calendar integrations and search/sync problems |
+| Things 3 | US iPhone: 4.8/5 from ~28K ratings; UK: 4.8/5 from ~4.3K ratings | Calm, uncluttered design; intuitive daily use; one-time purchase is appreciated | Some reviews find recurring-task setup confusing or want more explicit time/deadline handling and easier image capture |
+
+Sources:
+- Structured Belgium iPhone reviews: https://apps.apple.com/be/app/structured-daily-planner-todo/id1499198946?platform=iphone&see-all=reviews
+- Structured US reviews: https://apps.apple.com/us/app/structured-daily-planner-todo/id1499198946?platform=iphone&see-all=reviews
+- TickTick Belgium iPhone reviews: https://apps.apple.com/be/app/ticktick-to-do-list-calendar/id626144601?platform=iphone&see-all=reviews
+- TickTick US reviews: https://apps.apple.com/us/app/ticktick-to-do-list-calendar/id626144601?platform=iphone&see-all=reviews
+- Things 3 US reviews: https://apps.apple.com/us/app/things-3/id904237743?platform=iphone&see-all=reviews
+- Things 3 UK reviews: https://apps.apple.com/gb/app/things-3/id904237743?platform=iphone&see-all=reviews
+
+Method limitation: App Store pages surface selected reviews and counts can change; this is a qualitative sample, not an export of all reviews, sentiment analysis, or verified bug prevalence. Do not infer that a reported issue affects most users. The practical lesson for Dailume is to keep the calm visual language of Things, make day planning easier to understand than a plain list, and treat persistence, sync and date/time correctness as release-critical trust features.
