@@ -108,8 +108,8 @@ struct ContentView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
                     Text(selectedDate, format: .dateTime.month(.wide).day())
-                        .font(.system(size: 30, weight: .semibold))
-                        .tracking(-0.6)
+                        .font(.title2.weight(.semibold))
+                        .tracking(-0.4)
                 }
                 Spacer()
                 DatePicker("Choose date", selection: $selectedDate, displayedComponents: .date)
@@ -190,7 +190,8 @@ private struct PlannerRow: View {
                 Image(systemName: item.kind.symbol)
                     .font(.title3)
                     .foregroundStyle(Color(red: 0.32, green: 0.43, blue: 0.34))
-                    .frame(width: 24)
+                    .frame(width: 44, height: 44)
+                    .accessibilityHidden(true)
             }
             VStack(alignment: .leading, spacing: 5) {
                 Text(item.title)
