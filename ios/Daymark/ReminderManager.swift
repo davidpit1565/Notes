@@ -1,3 +1,4 @@
+import EventKit
 import Foundation
 import UserNotifications
 
@@ -78,6 +79,62 @@ enum ReminderManager {
             .prefix(60)
         for item in upcoming {
             await schedule(item)
+        }
+    }
+}
+
+
+@MainActor
+enum AppleIntegrationManager {
+    static func addCopyToCalendar(_ item: PlannerItem) async -> String {
+        guard item.kind == .event else { return "Only events can be added to Apple Calendar." }
+        let store = EKEventStore()
+        do {
+            let granted = try await store.requestWriteOnlyAccessToEvents()
+            guard granted else { return "Calendar access was not granted. You can change it in Settings." }
+            guard let calendar = store.defaultCalendarForNewEvents else {
+                return "No writable Apple Calendar is available on this device."
+            }
+            let calendarItem = EKEvent(eventStore: store)
+            calendarItem.title = item.title
+            calendarItem.notes = item.details
+            calendarItem.calendar = calendar
+            let startParts = Calendar.current.dateComponents([.hour, .minute], from: item.start)
+            let endParts = Calendar.current.dateComponents([.hour, .minute], from: item.end)
+            guard
+                let startHour = startParts.hour, let startMinute = startParts.minute,
+                let endHour = endParts.hour, let endMinute = endParts.minute,
+                let startDate = Calendar.current.date(bySettingHour: startHour, minute: startMinute, second: 0, of: item.date),
+                let endDate = Calendar.current.date(bySettingHour: endHour, minute: endMinute, second: 0, of: item.date),
+                endDate > startDate
+            else { return "This event has an invalid date or time. Edit it and try again." }
+            calendarItem.startDate = startDate
+            calendarItem.endDate = endDate
+            try store.save(calendarItem, span: .thisEvent, commit: true)
+            return "A copy was added to Apple Calendar. Future edits in Dailume will not sync automatically."
+        } catch {
+            return "Could not add this event to Apple Calendar. Check Calendar access in Settings and try again."
+        }
+    }
+
+    static func addCopyToReminders(_ item: PlannerItem) async -> String {
+        guard item.kind == .task else { return "Only tasks can be added to Apple Reminders." }
+        let store = EKEventStore()
+        do {
+            let granted = try await store.requestFullAccessToReminders()
+            guard granted else { return "Reminders access was not granted. You can change it in Settings." }
+            guard let calendar = store.defaultCalendarForNewReminders() else {
+                return "No writable Apple Reminders list is available on this device."
+            }
+            let reminder = EKReminder(eventStore: store)
+            reminder.title = item.title
+            reminder.notes = item.details.isEmpty ? nil : item.details
+            reminder.calendar = calendar
+            reminder.dueDateComponents = Calendar.current.dateComponents([.year, .month, .day], from: item.date)
+            try store.save(reminder, commit: true)
+            return "A copy was added to Apple Reminders. Future edits in Dailume will not sync automatically."
+        } catch {
+            return "Could not add this task to Apple Reminders. Check Reminders access in Settings and try again."
         }
     }
 }
