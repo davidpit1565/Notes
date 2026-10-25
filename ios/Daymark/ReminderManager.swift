@@ -20,11 +20,17 @@ enum ReminderManager {
         return true
     }
 
+    static func cancel(_ item: PlannerItem) async {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: ["dailume-event-\(item.id.uuidString)"]
+        )
+    }
+
     static func schedule(_ item: PlannerItem) async {
         guard item.kind == .event else { return }
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
-        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional || settings.authorizationStatus == .ephemeral else { return }
         let triggerDate = Calendar.current.date(
             bySettingHour: Calendar.current.component(.hour, from: item.start),
             minute: Calendar.current.component(.minute, from: item.start),
