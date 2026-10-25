@@ -143,3 +143,43 @@ test('switches between light and dark mode and remembers the choice', async ({ p
   await page.getByRole('button', { name: 'Switch to light mode' }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 })
+
+
+test('rejects impossible calendar dates in imported backups without changing saved items', async ({ page }) => {
+  const today = await page.evaluate(() => {
+    const date = new Date()
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  })
+  const existing = {
+    id: 'keep-me', date: today, title: 'Keep current data', details: '', kind: 'task',
+    start: '09:00', end: '09:30', done: false, category: 'Personal', createdAt: 1793000000000,
+  }
+  await page.evaluate(item => localStorage.setItem('daymark:v1', JSON.stringify({ items: [item] })), existing)
+  await page.reload()
+  const backup = {
+    schemaVersion: 1,
+    items: [{ ...existing, id: 'invalid-date', date: '2026-02-31', title: 'Invalid date' }],
+  }
+  await page.locator('input[aria-label="Import backup"]').setInputFiles({
+    name: 'invalid-date.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)),
+  })
+  await expect(page.getByText('This backup file is not valid for Dailume.')).toBeVisible()
+  await expect(page.getByText('Keep current data', { exact: true })).toBeVisible()
+  await expect(page.getByText('Invalid date', { exact: true })).toHaveCount(0)
+})
+
+test('rejects duplicate item IDs in imported backups', async ({ page }) => {
+  const today = await page.evaluate(() => {
+    const date = new Date()
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  })
+  const item = {
+    id: 'duplicate-id', date: today, title: 'Duplicate item', details: '', kind: 'task',
+    start: '09:00', end: '09:30', done: false, category: 'Personal', createdAt: 1793000000000,
+  }
+  const backup = { schemaVersion: 1, items: [item, { ...item, title: 'Second duplicate' }] }
+  await page.locator('input[aria-label="Import backup"]').setInputFiles({
+    name: 'duplicate-ids.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)),
+  })
+  await expect(page.getByText('This backup file is not valid for Dailume.')).toBeVisible()
+})
