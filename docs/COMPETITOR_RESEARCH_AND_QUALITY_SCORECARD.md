@@ -18,7 +18,7 @@ Scope: web planner + native iOS app; tasks, timed events, notes, local persisten
 3. Calendar and Reminders integrations currently create **copies** through EventKit. They are not linked records and do not provide two-way synchronization. Repeated exports may create duplicates.
 4. Native notification delivery, permissions, VoiceOver, Dynamic Type on real devices, time-zone/DST behavior, and reboot behavior still require device-level verification.
 5. SEO should be treated as a separate acquisition layer, not a reason to index private task content. The current site is a single JavaScript app with basic title/description; it is not yet a content-rich marketing site. Google recommends descriptive unique titles, crawlable links, and appropriate handling of JavaScript content. A sitemap helps discovery but does not guarantee indexing or ranking.
-6. Current browser CI caught a real keyboard-focus regression. The fix is committed as `22f1bcdc`; its rerun must pass before calling it verified.
+6. Current browser CI caught a real keyboard-focus regression. The fix passed the browser suite on `22f1bcdc` and later commits; the latest completed local E2E run before this documentation update passed 20/20 tests.
 
 ## Competitor 1 — Apple Reminders
 
@@ -250,7 +250,9 @@ The current web app is a single-page planner, not a multi-page product with sepa
 - Native Calendar and Reminders actions create copies; future edits are not synchronized.
 - Web backup/import exists; native iOS backup/import is not yet implemented.
 - Automated Playwright coverage exists for key web flows; it cannot prove real iPhone notification delivery or VoiceOver behavior.
-- The most recent focus-restoration fix is commit `22f1bcdc` and must be judged by its rerun result, not by commit existence alone.
+- The focus-restoration fix is commit `22f1bcdc`; it passed the 20-test browser suite on `12ac526d` and the subsequent 20-test suite on `37b2052a`.
+- A live smoke run on `6e0de132` exposed a deployment inconsistency: the browser received raw `src/main.tsx` with an incorrect JavaScript MIME type and showed the startup fallback. A later live smoke run on `37b2052a` passed 4/4 checks after the custom build/deploy workflow completed.
+- Both the custom `.github/workflows/deploy.yml` workflow and a GitHub-generated `pages build and deployment` workflow are running for the same pushes. This creates a potential race where the root-source deployment can overwrite the built Vite output. Confirm the Pages source is set to **GitHub Actions** and that the dynamic branch-source deployment is no longer triggered; this cannot be resolved by editing the app code alone.
 
 ### Do not do without a decision
 - Do not add authentication before choosing backend, authorization rules, deletion/export, privacy disclosures, conflict resolution, offline behavior and ongoing cost.
@@ -283,8 +285,8 @@ Scores are deliberately not filled in without executing the relevant test. Mark 
 |---|---|---|
 | Production build / TypeScript | GitHub Actions green on current SHA | Build workflow passed on `22f1bcdc`; verify full current run |
 | Browser E2E | All Playwright tests green | Rerun pending after focus fix |
-| Live deployment smoke | Latest deployed SHA loaded and key flows passed | Previous SHA smoke passed; latest SHA smoke queued |
-| SEO metadata | Inspect deployed HTML, canonical decision, title, description, social preview | Code updated with canonical, OG basics and sitemap; deployed smoke test pending |
+| Live deployment smoke | Latest deployed SHA loaded and key flows passed | 4/4 passed on `37b2052a`; deployment race remains a risk because two deployment workflows run |
+| SEO metadata | Inspect deployed HTML, canonical decision, title, description, social preview | 20-test E2E passed on `12ac526d`, including canonical metadata and sitemap; live metadata test passed 4/4 on `37b2052a` |
 | Performance | Lighthouse on production URL, mobile and desktop; record LCP/CLS/INP | Not tested in this pass |
 | Accessibility | Automated audit + keyboard + VoiceOver + Dynamic Type on device | Partial web keyboard test; native device testing not done |
 | Responsive | Automated 320 px and device/tablet checks | 320 px overflow test exists; broader coverage needed |
