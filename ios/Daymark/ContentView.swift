@@ -187,6 +187,7 @@ private struct PlannerRow: View {
     let onToggle: () -> Void
     let onEdit: () -> Void
     let onDelete: () -> Void
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 13) {
@@ -197,6 +198,8 @@ private struct PlannerRow: View {
                         .foregroundStyle(item.isDone ? .green : .secondary)
                 }
                 .buttonStyle(.plain)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
                 .accessibilityLabel(item.isDone ? "Mark task incomplete" : "Mark task complete")
             } else {
                 Image(systemName: item.kind.symbol)
@@ -221,7 +224,7 @@ private struct PlannerRow: View {
             Spacer(minLength: 4)
             Menu {
                 Button(action: onEdit) { Label("Edit", systemImage: "pencil") }
-                Button(role: .destructive, action: onDelete) { Label("Delete", systemImage: "trash") }
+                Button(role: .destructive) { showingDeleteConfirmation = true } label: { Label("Delete", systemImage: "trash") }
             } label: {
                 Image(systemName: "ellipsis").foregroundStyle(.tertiary).padding(8).contentShape(Rectangle())
             }
