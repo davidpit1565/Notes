@@ -187,7 +187,7 @@ export default function App() {
         <p>{searchText ? 'Try another word, or clear your search.' : tab === 'Today' ? 'Add the one thing you would like to get done today.' : tab === 'Upcoming' ? 'Tasks and events scheduled for later will appear here.' : 'Save an idea before it slips away.'}</p>
       </div>}
 
-      <button className="floating-add" onClick={openNew} aria-label={tab === 'Notes' ? 'Add note' : 'Add task or event'}><Plus size={25} /><span>{tab === 'Notes' ? 'New note' : 'New item'}</span></button>
+      <button className="floating-add" onClick={openNew} aria-label={tab === 'Notes' ? 'New note' : 'New item'}><Plus size={25} /><span>{tab === 'Notes' ? 'New note' : 'New item'}</span></button>
 
       <nav className="tab-bar" aria-label="Main navigation">
         {(['Today', 'Upcoming', 'Notes'] as Tab[]).map((name, index) => <button key={name} className={tab === name ? 'selected' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => { setTab(name); setSearchText('') }}>
